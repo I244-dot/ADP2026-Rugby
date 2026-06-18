@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="description" content="Outil ADP 2026 EPS Rugby — Aide à la décision pédagogique — CRMEF Inezgane">
+<meta name="theme-color" content="#0F0F0D">
+<title>Outil ADP 2026 — Rugby — COLL3_EQ_05</title>
+<style>
+  /* ── Polices embarquées (fallback hors connexion) ── */
+  /* Polices système — fonctionne hors connexion (condition 1) */
+
+  /* ── Variables ── */
+    --bg:       #0F0F0D;
+    --bg2:      #181816;
+    --bg3:      #222220;
+    --border:   #2E2E2B;
+    --text:     #E8E5DC;
+    --muted:    #888880;
+    --accent:   #C8A84B;
+    --a-bg:     #3A1515; --a-fg: #F5A0A0; --a-bd: #6B2020;
+    --b-bg:     #2E2410; --b-fg: #F5C878; --b-bd: #6B5010;
+    --c-bg:     #0E2A14; --c-fg: #78C878; --c-bd: #1A5A20;
+    --radius:   6px;
+    --font-h:   'Segoe UI', Arial, sans-serif;
+    --font-b:   'Segoe UI', Arial, sans-serif;
+    --font-m:   'Courier New', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--bg); color: var(--text); font-family: var(--font-b); font-size: 14px; }
+  body { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+  /* ── Barre déploiement / confidentialité (condition 2) ── */
+  .deploy-bar { background:#0A1A0A; border:1px solid #1A5A20; border-radius:var(--radius);
+    padding:10px 14px; margin-bottom:14px; display:flex; align-items:center;
+    gap:10px; flex-wrap:wrap; font-size:12px; }
+  .deploy-bar-icon { font-size:16px; flex-shrink:0; }
+  .deploy-bar-text { flex:1; color:#78C878; }
+  .deploy-bar-text strong { color:#A8E8A8; }
+
+  /* ── Barre session (condition 5/6/8) ── */
+  .session-bar { background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--radius); padding:10px 14px; margin-bottom:14px;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .session-bar-title { font-family:var(--font-m); font-size:11px; color:var(--muted); flex-shrink:0; }
+  .btn-session { background:none; border:1px solid var(--border); color:var(--muted);
+    border-radius:4px; padding:5px 10px; font-family:var(--font-h); font-size:11px;
+    font-weight:700; cursor:pointer; transition:all .15s; white-space:nowrap; }
+  .btn-session:hover { border-color:var(--accent); color:var(--text); }
+  .btn-session.danger { border-color:var(--a-bd); color:var(--a-fg); }
+  .btn-session.danger:hover { background:var(--a-bg); }
+  .btn-session.demo { border-color:#1A5A20; color:#78C878; }
+  .btn-session.demo:hover { background:#0E2A14; }
+
+  /* ── Indicateur auto-save ── */
+  .autosave-indicator { font-family:var(--font-m); font-size:10px; color:var(--muted);
+    display:flex; align-items:center; gap:4px; }
+  .autosave-dot { width:6px; height:6px; border-radius:50%; background:var(--muted);
+    transition:background .3s; }
+  .autosave-dot.saved { background:#27AE60; }
+  .autosave-dot.saving { background:#E67E22; animation:pulse .6s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── Confirmation dialog ── */
+  .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:900;
+    display:flex; align-items:center; justify-content:center; padding:16px; }
+  .confirm-box { background:var(--bg2); border:1px solid var(--a-bd);
+    border-radius:10px; padding:24px; max-width:400px; width:100%; }
+  .confirm-box h3 { font-family:var(--font-h); font-size:1rem; font-weight:800;
+    color:var(--a-fg); margin-bottom:10px; }
+  .confirm-box p { font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+  .confirm-btns { display:flex; gap:10px; justify-content:flex-end; }
+
+  /* ── Responsive mobile 380px (condition 4) ── */
+  @media (max-width:480px) {
+    body { padding:8px; }
+    .app-header { flex-direction:column; align-items:flex-start; }
+    .stepper { flex-wrap:wrap; }
+    .step-btn { flex:1 1 45%; font-size:10px; padding:8px 2px; }
+    .btn-row { flex-direction:column; }
+    .btn-row .btn { width:100%; justify-content:center; }
+    .save-bar { flex-direction:column; align-items:stretch; }
+    .save-input { width:100%; }
+    .session-bar { flex-direction:column; align-items:stretch; }
+    .row-inputs { grid-template-columns:1fr; }
+    .row-inputs.header-row { display:none; }
+    .stats-row { grid-template-columns:1fr 1fr; }
+    .nf-modal, .bg-modal, .tr-modal, .rm-modal { border-radius:0; }
+    .nf-tbl th, .nf-tbl td { padding:4px 4px; font-size:11px; }
+    .rm-cards { grid-template-columns:1fr; }
+    .bg-obj-grid { grid-template-columns:1fr; }
+    .nf-stats, .tr-stats-grid, .nf-dist-bar { font-size:11px; }
+    /* Empêcher le débordement des tableaux */
+    .tbl, .nf-tbl, .rm-tbl, .bg-elv-tbl, .tr-elv-tbl { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  }
+
+  /* ── Header ── */
+  .app-header { border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; }
+  .app-title { font-family: var(--font-h); font-size: 1.3rem; font-weight: 800; letter-spacing: -.02em; }
+  .app-title span { color: var(--accent); }
+  .app-sub { font-family: var(--font-m); font-size: 11px; color: var(--muted); }
+  .app-notice { font-size: 11px; color: var(--muted); background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; }
+
+  /* ── Stepper ── */
+  .stepper { display: flex; gap: 0; margin-bottom: 24px; }
+  .step-btn { flex: 1; padding: 10px 4px; font-family: var(--font-h); font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: var(--bg2); color: var(--muted); cursor: pointer; text-align: center; transition: all .15s; }
+  .step-btn:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .step-btn:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+  .step-btn.active  { background: var(--accent); color: #0F0F0D; border-color: var(--accent); }
+  .step-btn.done    { background: var(--bg3); color: var(--text); border-color: var(--border); }
+  .step-btn.locked  { opacity: .4; cursor: not-allowed; }
+
+  /* ── Panels ── */
+  .panel { display: none; }
+  .panel.visible { display: block; }
+
+  /* ── Cards ── */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
+  .card-title { font-family: var(--font-h); font-size: .85rem; font-weight: 700; color: var(--accent); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 12px; }
+
+  /* ── Forms ── */
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
+  input[type=text], input[type=number] { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 7px 10px; font-family: var(--font-b); font-size: 13px; outline: none; }
+  input:focus { border-color: var(--accent); }
+  input.err { border-color: var(--a-bd); }
+  .row-inputs { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 6px; }
+  .row-inputs.header-row { font-family: var(--font-m); font-size: 11px; color: var(--muted); grid-template-columns: 2fr 1fr 1fr 1fr auto; }
+  .row-inputs .obs-label { font-size: 11px; color: var(--muted); }
+  .btn-del { background: none; border: 1px solid var(--a-bd); color: var(--a-fg); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; }
+  .btn-del:hover { background: var(--a-bg); }
+
+  /* ── Buttons ── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: var(--radius); font-family: var(--font-h); font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: var(--accent); color: #0F0F0D; }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* ── Tables ── */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tbl th { font-family: var(--font-m); font-size: 10px; color: var(--muted); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .tbl td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl tr.prof-a td { background: var(--a-bg); }
+  .tbl tr.prof-b td { background: var(--b-bg); }
+  .tbl tr.prof-c td { background: var(--c-bg); }
+
+  /* ── Badge ── */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-family: var(--font-m); font-size: 11px; font-weight: 500; }
+  .badge-a { background: var(--a-bg); color: var(--a-fg); border: 1px solid var(--a-bd); }
+  .badge-b { background: var(--b-bg); color: var(--b-fg); border: 1px solid var(--b-bd); }
+  .badge-c { background: var(--c-bg); color: var(--c-fg); border: 1px solid var(--c-bd); }
+
+  /* ── Stat cards ── */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+  .stat-num { font-family: var(--font-h); font-size: 2rem; font-weight: 800; }
+  .stat-num.sa { color: var(--a-fg); }
+  .stat-num.sb { color: var(--b-fg); }
+  .stat-num.sc { color: var(--c-fg); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Axes checkboxes ── */
+  .axe-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; transition: border-color .15s; }
+  .axe-item.selected { border-color: var(--accent); }
+  .axe-item input[type=checkbox] { margin-top: 2px; accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+  .axe-meta { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--font-m); }
+  .axe-title { font-family: var(--font-h); font-size: .8rem; font-weight: 700; }
+  .pertinence-bar { height: 4px; background: var(--bg); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .pertinence-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s; }
+
+  /* ── Slider ── */
+  .slider-wrap { margin: 16px 0; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .slider-val { font-family: var(--font-h); font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+  .slider-preview { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-top: 10px; font-size: 12px; }
+  .seq-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .seq-row:last-child { border-bottom: none; }
+  .seq-num { font-family: var(--font-m); color: var(--accent); width: 20px; flex-shrink: 0; }
+
+  /* ── Planification ── */
+  .seq-block { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
+  .seq-header { background: var(--bg3); padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .seq-header-title { font-family: var(--font-h); font-weight: 700; font-size: .9rem; }
+  .planif-tbl { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .planif-tbl th { font-family: var(--font-m); font-size: 10px; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; background: var(--bg3); }
+  .planif-tbl td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .planif-tbl .gr-a { background: #1e0c0c; }
+  .planif-tbl .gr-b { background: #1c1508; }
+  .planif-tbl .gr-c { background: #071508; }
+  .consigne { font-style: italic; color: var(--muted); font-size: 11px; margin-top: 3px; }
+  .critere  { font-family: var(--font-m); font-size: 10px; color: var(--accent); margin-top: 3px; }
+  .indicatif-box { background: var(--bg); border-left: 3px solid var(--accent); padding: 6px 10px; margin: 0 10px 8px; font-size: 11px; color: var(--muted); }
+
+  /* ── CSV import zone ── */
+  .drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: border-color .15s; margin-bottom: 12px; }
+  .drop-zone:hover { border-color: var(--accent); }
+  .drop-zone input { display: none; }
+
+  /* ── Alert ── */
+  .alert { padding: 10px 14px; border-radius: var(--radius); font-size: 12px; margin-bottom: 10px; }
+  .alert-err  { background: var(--a-bg); border: 1px solid var(--a-bd); color: var(--a-fg); }
+  .alert-ok   { background: var(--c-bg); border: 1px solid var(--c-bd); color: var(--c-fg); }
+  .alert-warn { background: var(--b-bg); border: 1px solid var(--b-bd); color: var(--b-fg); }
+
+  /* ── Decision box ── */
+  .decision-box { background: var(--bg3); border: 1px solid var(--accent); border-radius: var(--radius); padding: 14px; margin-top: 14px; font-family: var(--font-h); font-weight: 700; font-size: .95rem; }
+  .decision-note { font-size: 11px; color: var(--muted); font-family: var(--font-b); font-weight: 400; margin-top: 4px; }
+
+  /* ── Summary ── */
+  .summary-row { display: grid; grid-template-columns: 80px 1fr 80px 120px; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+  .summary-row:last-child { border-bottom: none; }
+
+  /* ══════════════════════════════════════════════════
+     DÉTECTION REMÉDIATION / ACCOMPAGNEMENT
+  ══════════════════════════════════════════════════ */
+  .rm-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.87); z-index:600;
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:16px; overflow-y:auto; }
+  .rm-modal { background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; width:100%; max-width:980px;
+    box-shadow:0 32px 80px rgba(0,0,0,.8); overflow:hidden; }
+
+  /* En-tête */
+  .rm-head { background:linear-gradient(135deg,#1a0a2e,#2d1250);
+    padding:15px 22px; display:flex; justify-content:space-between;
+    align-items:center; border-bottom:1px solid #3a1a5e; }
+  .rm-head-title { font-family:var(--font-h); font-size:1rem; font-weight:800; color:#E8D0FF; }
+  .rm-head-title em { color:#B06EFF; font-style:normal; }
+  .rm-head-sub { font-family:var(--font-m); font-size:11px; color:#7A5A9A; margin-top:2px; }
+  .rm-close { background:none; border:1px solid #3a1a5e; color:#7A5A9A;
+    border-radius:4px; padding:4px 12px; cursor:pointer; font-size:13px; }
+  .rm-close:hover { border-color:var(--a-bd); color:var(--a-fg); }
+  .rm-body { padding:22px; }
+
+  /* Onglets */
+  .rm-tabs { display:flex; gap:0; margin-bottom:20px;
+    border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .rm-tab { flex:1; padding:9px 4px; font-family:var(--font-h); font-size:11px;
+    font-weight:700; background:var(--bg3); color:var(--muted);
+    border:none; cursor:pointer; text-align:center; transition:all .15s; }
+  .rm-tab.active { background:#6A1FBF; color:#fff; }
+  .rm-tab-panel { display:none; }
+  .rm-tab-panel.visible { display:block; }
+
+  /* Compteurs en-tête */
+  .rm-counters { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:10px; margin-bottom:18px; }
+  .rm-counter { border-radius:var(--radius); padding:14px; text-align:center; }
+  .rm-counter-n { font-family:var(--font-h); font-size:2.2rem; font-weight:800; }
+  .rm-counter-l { font-size:11px; margin-top:3px; }
+  .rm-counter.rem  { background:#3A1515; border:1px solid #6B2020; }
+  .rm-counter.rem .rm-counter-n { color:#F5A0A0; }
+  .rm-counter.rem .rm-counter-l { color:#9A5050; }
+  .rm-counter.acc  { background:#2E2410; border:1px solid #6B5010; }
+  .rm-counter.acc .rm-counter-n { color:#F5C878; }
+  .rm-counter.acc .rm-counter-l { color:#9A7030; }
+  .rm-counter.tut  { background:#0d1f33; border:1px solid #1e3a5a; }
+  .rm-counter.tut .rm-counter-n { color:#5AC8FA; }
+  .rm-counter.tut .rm-counter-l { color:#3A6A8A; }
+  .rm-counter.ok   { background:#0E2A14; border:1px solid #1A5A20; }
+  .rm-counter.ok  .rm-counter-n { color:#78C878; }
+  .rm-counter.ok  .rm-counter-l { color:#3A7A3A; }
+
+  /* Cartes élèves */
+  .rm-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:12px; margin-bottom:16px; }
+  .rm-card { border-radius:var(--radius); padding:14px; border:1px solid; }
+  .rm-card.rem-card  { background:#2A0A0A; border-color:#6B2020; }
+  .rm-card.acc-card  { background:#231500; border-color:#6B5010; }
+  .rm-card.tut-card  { background:#071218; border-color:#1e3a5a; }
+  .rm-card.ok-card   { background:#051808; border-color:#1A5A20; }
+  .rm-card-head { display:flex; justify-content:space-between;
+    align-items:flex-start; margin-bottom:8px; }
+  .rm-card-nom { font-family:var(--font-h); font-size:.85rem; font-weight:700; }
+  .rm-card-score { font-family:var(--font-h); font-size:1.1rem; font-weight:800; }
+  .rm-card-score.s-rem { color:#F5A0A0; }
+  .rm-card-score.s-acc { color:#F5C878; }
+  .rm-card-score.s-tut { color:#5AC8FA; }
+  .rm-card-score.s-ok  { color:#78C878; }
+  .rm-card-type { display:inline-block; font-family:var(--font-m); font-size:10px;
+    font-weight:700; padding:2px 7px; border-radius:3px; margin-bottom:8px; }
+  .rm-card-type.t-rem { background:#6B2020; color:#F5A0A0; }
+  .rm-card-type.t-acc { background:#6B5010; color:#F5C878; }
+  .rm-card-type.t-tut { background:#1e3a5a; color:#5AC8FA; }
+  .rm-card-type.t-ok  { background:#1A5A20; color:#78C878; }
+  .rm-card-detail { font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .rm-card-lacunes { font-size:11px; margin-bottom:6px; }
+  .rm-card-action { background:var(--bg3); border-radius:4px; padding:8px 10px;
+    font-size:11px; border-left:2px solid; }
+  .rm-card-action.a-rem { border-color:#E74C3C; }
+  .rm-card-action.a-acc { border-color:#E67E22; }
+  .rm-card-action.a-tut { border-color:#5AC8FA; }
+  .rm-card-action.a-ok  { border-color:#27AE60; }
+  .rm-card-action strong { display:block; font-size:10px; text-transform:uppercase;
+    letter-spacing:.04em; margin-bottom:2px; }
+  .rm-card-action.a-rem strong { color:#E74C3C; }
+  .rm-card-action.a-acc strong { color:#E67E22; }
+  .rm-card-action.a-tut strong { color:#5AC8FA; }
+  .rm-card-action.a-ok  strong { color:#27AE60; }
+
+  /* Tableau consolidé */
+  .rm-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+  .rm-tbl th { font-family:var(--font-m); font-size:10px; color:var(--muted);
+    padding:6px 8px; border-bottom:1px solid var(--border);
+    background:var(--bg3); text-align:left; white-space:nowrap; }
+  .rm-tbl td { padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .rm-tbl tr:last-child td { border-bottom:none; }
+  .rm-pill { display:inline-block; padding:2px 8px; border-radius:10px;
+    font-family:var(--font-m); font-size:10px; font-weight:700; }
+  .rm-pill.p-rem { background:#3A1515; color:#F5A0A0; border:1px solid #6B2020; }
+  .rm-pill.p-acc { background:#2E2410; color:#F5C878; border:1px solid #6B5010; }
+  .rm-pill.p-tut { background:#0d1f33; color:#5AC8FA; border:1px solid #1e3a5a; }
+  .rm-pill.p-ok  { background:#0E2A14; color:#78C878; border:1px solid #1A5A20; }
+
+  /* Plan de remédiation */
+  .rm-plan-section { margin-bottom:16px; }
+  .rm-plan-titre { font-family:var(--font-h); font-size:.85rem; font-weight:800;
+    margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .rm-plan-badge { font-size:11px; padding:2px 8px; border-radius:3px;
+    font-family:var(--font-m); font-weight:700; }
+  .rm-plan-item { background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--radius); padding:12px 14px; margin-bottom:8px; }
+  .rm-plan-item-head { display:flex; justify-content:space-between;
+    align-items:baseline; margin-bottom:6px; }
+  .rm-plan-item-nom { font-weight:600; font-size:12px; }
+  .rm-plan-item-score { font-family:var(--font-m); font-size:11px; color:var(--muted); }
+  .rm-plan-item-body { font-size:11px; color:var(--muted); line-height:1.6; }
+  .rm-plan-item-body strong { color:var(--text); }
+
+  @media print {
+    .rm-modal-bg { position:static; background:none; display:block; padding:0; }
+    .rm-modal { box-shadow:none; border:none; }
+    .rm-close, .rm-tabs, .rm-btn-row { display:none !important; }
+    .rm-tab-panel { display:block !important; }
+    body > *:not(.rm-modal-bg) { display:none !important; }
+  }
+
+  /* ══════════════════════════════════════════════════
+     TAUX DE RÉUSSITE DE LA CLASSE
+  ══════════════════════════════════════════════════ */
+  .tr-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:500;
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:16px; overflow-y:auto; }
+  .tr-modal { background:var(--bg2); border:1px solid var(--border);
+    border-radius:12px; width:100%; max-width:920px;
+    box-shadow:0 32px 80px rgba(0,0,0,.8); overflow:hidden; }
+
+  /* En-tête */
+  .tr-head { background:linear-gradient(135deg,#0d1f33,#163355);
+    padding:15px 22px; display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid #1e3a5a; }
+  .tr-head-title { font-family:var(--font-h); font-size:1rem; font-weight:800; color:#D0E8FF; }
+  .tr-head-title em { color:#5AC8FA; font-style:normal; }
+  .tr-head-sub { font-family:var(--font-m); font-size:11px; color:#5A7A9A; margin-top:2px; }
+  .tr-close { background:none; border:1px solid #1e3a5a; color:#5A7A9A;
+    border-radius:4px; padding:4px 12px; cursor:pointer; font-size:13px; }
+  .tr-close:hover { border-color:var(--a-bd); color:var(--a-fg); }
+  .tr-body { padding:22px; }
+
+  /* Seuil de réussite configurable */
+  .tr-seuil-bar { background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px 18px; margin-bottom:18px;
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .tr-seuil-lbl { font-size:12px; color:var(--muted); flex-shrink:0; }
+  .tr-seuil-val { font-family:var(--font-h); font-size:1.6rem; font-weight:800;
+    color:#5AC8FA; min-width:40px; text-align:center; }
+  .tr-seuil-unit { font-size:12px; color:var(--muted); }
+  input#tr-seuil-slider { flex:1; min-width:120px; accent-color:#5AC8FA; }
+  .tr-seuil-note { font-size:11px; color:var(--muted); font-style:italic; }
+
+  /* Grande jauge principale */
+  .tr-jauge-main { background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--radius); padding:20px; margin-bottom:16px; text-align:center; }
+  .tr-pct-big { font-family:var(--font-h); font-size:5rem; font-weight:800;
+    line-height:1; transition:color .3s; }
+  .tr-pct-sub { font-size:13px; color:var(--muted); margin-top:6px; }
+  .tr-jauge-bar { height:18px; background:var(--bg); border-radius:9px;
+    overflow:hidden; margin:14px 0 8px; }
+  .tr-jauge-fill { height:100%; border-radius:9px; transition:width .5s ease, background .3s; }
+  .tr-jauge-ticks { display:flex; justify-content:space-between;
+    font-family:var(--font-m); font-size:10px; color:var(--muted); margin-bottom:4px; }
+  .tr-verdict { font-family:var(--font-h); font-size:.95rem; font-weight:800;
+    margin-top:10px; padding:8px 16px; border-radius:var(--radius);
+    display:inline-block; }
+  .tr-verdict.v-ok   { background:#0E2A14; color:#78C878; border:1px solid #1A5A20; }
+  .tr-verdict.v-moy  { background:#2E2410; color:#F5C878; border:1px solid #6B5010; }
+  .tr-verdict.v-bas  { background:#3A1515; color:#F5A0A0; border:1px solid #6B2020; }
+
+  /* Grille de mini-stats */
+  .tr-stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px; margin-bottom:18px; }
+  .tr-stat { background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--radius); padding:14px; text-align:center; }
+  .tr-stat-n { font-family:var(--font-h); font-size:2rem; font-weight:800; }
+  .tr-stat-l { font-size:11px; color:var(--muted); margin-top:3px; }
+
+  /* Courbe de distribution des notes (visualisation HTML) */
+  .tr-distrib { background:var(--bg3); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px; margin-bottom:16px; }
+  .tr-distrib-title { font-family:var(--font-h); font-size:.8rem; font-weight:700;
+    color:var(--accent); text-transform:uppercase; letter-spacing:.05em; margin-bottom:14px; }
+  .tr-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12px; }
+  .tr-bar-lbl { font-family:var(--font-m); font-size:11px; color:var(--muted);
+    width:80px; flex-shrink:0; text-align:right; }
+  .tr-bar-outer { flex:1; background:var(--bg); border-radius:4px; height:20px; overflow:hidden; }
+  .tr-bar-inner { height:100%; border-radius:4px; display:flex; align-items:center;
+    justify-content:flex-end; padding-right:6px; font-family:var(--font-m);
+    font-size:10px; font-weight:700; color:#fff; transition:width .5s ease; }
+  .tr-bar-count { width:40px; text-align:left; font-family:var(--font-m);
+    font-size:11px; color:var(--muted); flex-shrink:0; }
+  .tr-seuil-line { border-left:2px dashed #5AC8FA; padding-left:8px;
+    font-size:11px; color:#5AC8FA; font-family:var(--font-m); margin:8px 0; }
+
+  /* Tableau réussite par élève */
+  .tr-elv-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+  .tr-elv-tbl th { font-family:var(--font-m); font-size:10px; color:var(--muted);
+    padding:6px 8px; border-bottom:1px solid var(--border); background:var(--bg3);
+    text-align:left; }
+  .tr-elv-tbl td { padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .tr-elv-tbl tr:last-child td { border-bottom:none; }
+  .tr-pill-ok  { display:inline-block; background:#0E2A14; color:#78C878;
+    border:1px solid #1A5A20; border-radius:10px; padding:2px 8px;
+    font-family:var(--font-m); font-size:10px; font-weight:700; }
+  .tr-pill-non { display:inline-block; background:#3A1515; color:#F5A0A0;
+    border:1px solid #6B2020; border-radius:10px; padding:2px 8px;
+    font-family:var(--font-m); font-size:10px; font-weight:700; }
+  .tr-pill-lim { display:inline-block; background:#2E2410; color:#F5C878;
+    border:1px solid #6B5010; border-radius:10px; padding:2px 8px;
+    font-family:var(--font-m); font-size:10px; font-weight:700; }
+
+  /* Analyse par seuil */
+  .tr-analyse { background:var(--bg3); border-left:3px solid #5AC8FA;
+    border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px;
+    margin-bottom:10px; font-size:12px; color:var(--muted); }
+  .tr-analyse strong { color:var(--text); }
+
+  @media print {
+    .tr-modal-bg { position:static; background:none; display:block; padding:0; }
+    .tr-modal { box-shadow:none; border:none; }
+    .tr-close, .tr-seuil-bar, .tr-btn-row { display:none !important; }
+    body > *:not(.tr-modal-bg) { display:none !important; }
+  }
+
+  /* ══════════════════════════════════════════════════
+     BILAN GLOBAL — ATTEINTE DES OBJECTIFS
+  ══════════════════════════════════════════════════ */
+  .bg-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:400; display:flex; align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto; }
+  .bg-modal { background:var(--bg2); border:1px solid var(--border); border-radius:12px; width:100%; max-width:960px; overflow:hidden; box-shadow:0 32px 80px rgba(0,0,0,.8); }
+
+  /* En-tête modal bilan */
+  .bg-head { display:flex; justify-content:space-between; align-items:center; padding:16px 22px; background:linear-gradient(135deg,#1a1a16,#2a2a24); border-bottom:1px solid var(--border); }
+  .bg-head-left { display:flex; flex-direction:column; gap:3px; }
+  .bg-head-title { font-family:var(--font-h); font-size:1.05rem; font-weight:800; }
+  .bg-head-title em { color:var(--accent); font-style:normal; }
+  .bg-head-sub { font-family:var(--font-m); font-size:11px; color:var(--muted); }
+  .bg-close { background:none; border:1px solid var(--border); color:var(--muted); border-radius:4px; padding:4px 12px; cursor:pointer; font-size:13px; }
+  .bg-close:hover { border-color:var(--a-bd); color:var(--a-fg); }
+  .bg-body { padding:22px; }
+
+  /* Onglets bilan */
+  .bg-tabs { display:flex; gap:0; margin-bottom:20px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .bg-tab { flex:1; padding:9px 6px; font-family:var(--font-h); font-size:12px; font-weight:700; background:var(--bg3); color:var(--muted); border:none; cursor:pointer; text-align:center; transition:all .15s; }
+  .bg-tab.active { background:var(--accent); color:#0F0F0D; }
+  .bg-tab-panel { display:none; }
+  .bg-tab-panel.visible { display:block; }
+
+  /* Jauge d'atteinte globale */
+  .bg-jauge-wrap { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; margin-bottom:16px; }
+  .bg-jauge-title { font-family:var(--font-h); font-size:.8rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; }
+  .bg-score-big { display:flex; align-items:baseline; gap:6px; margin-bottom:6px; }
+  .bg-score-num { font-family:var(--font-h); font-size:3rem; font-weight:800; line-height:1; }
+  .bg-score-den { font-family:var(--font-m); font-size:1rem; color:var(--muted); }
+  .bg-score-lbl { font-size:12px; color:var(--muted); margin-left:4px; }
+  .bg-progress { height:14px; background:var(--bg); border-radius:7px; overflow:hidden; margin:8px 0 4px; }
+  .bg-progress-fill { height:100%; border-radius:7px; transition:width .6s ease; }
+  .bg-verdict { font-family:var(--font-h); font-size:.9rem; font-weight:700; margin-top:8px; }
+  .bg-verdict.att-ok   { color:#27AE60; }
+  .bg-verdict.att-part { color:#E67E22; }
+  .bg-verdict.att-non  { color:#E74C3C; }
+
+  /* Grille d'objectifs par critère */
+  .bg-obj-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-bottom:16px; }
+  .bg-obj-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:14px; }
+  .bg-obj-card-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .bg-obj-crit { font-family:var(--font-h); font-size:.78rem; font-weight:700; }
+  .bg-obj-pct { font-family:var(--font-h); font-size:1.4rem; font-weight:800; }
+  .bg-obj-pct.ok   { color:#27AE60; }
+  .bg-obj-pct.part { color:#E67E22; }
+  .bg-obj-pct.non  { color:#E74C3C; }
+  .bg-obj-bar { height:8px; background:var(--bg); border-radius:4px; overflow:hidden; margin-bottom:8px; }
+  .bg-obj-fill { height:100%; border-radius:4px; transition:width .5s; }
+  .bg-obj-detail { font-size:11px; color:var(--muted); display:flex; gap:8px; flex-wrap:wrap; }
+  .bg-obj-tgt { font-size:11px; color:var(--muted); margin-top:6px; font-style:italic; }
+  .bg-obj-status { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; margin-top:6px; }
+  .bg-obj-status.ok   { color:#27AE60; }
+  .bg-obj-status.part { color:#E67E22; }
+  .bg-obj-status.non  { color:#E74C3C; }
+
+  /* Tableau élèves par objectif */
+  .bg-elv-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+  .bg-elv-tbl th { font-family:var(--font-m); font-size:10px; color:var(--muted); padding:6px 8px; border-bottom:1px solid var(--border); background:var(--bg3); text-align:left; }
+  .bg-elv-tbl td { padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .bg-elv-tbl tr:last-child td { border-bottom:none; }
+  .bg-att-pill { display:inline-block; padding:2px 8px; border-radius:10px; font-family:var(--font-m); font-size:10px; font-weight:700; }
+  .bg-att-pill.att  { background:#0E2A14; color:#78C878; border:1px solid #1A5A20; }
+  .bg-att-pill.part { background:#2E2410; color:#F5C878; border:1px solid #6B5010; }
+  .bg-att-pill.non  { background:#3A1515; color:#F5A0A0; border:1px solid #6B2020; }
+
+  /* Recommandations */
+  .bg-reco-list { display:flex; flex-direction:column; gap:10px; }
+  .bg-reco-item { background:var(--bg3); border-left:3px solid var(--accent); border-radius:0 var(--radius) var(--radius) 0; padding:12px 16px; }
+  .bg-reco-priority { font-family:var(--font-m); font-size:10px; color:var(--accent); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .bg-reco-titre { font-family:var(--font-h); font-size:.83rem; font-weight:700; margin-bottom:4px; }
+  .bg-reco-detail { font-size:12px; color:var(--muted); }
+  .bg-reco-item.reco-urgence { border-left-color:#E74C3C; }
+  .bg-reco-item.reco-urgence .bg-reco-priority { color:#E74C3C; }
+  .bg-reco-item.reco-ok { border-left-color:#27AE60; }
+  .bg-reco-item.reco-ok .bg-reco-priority { color:#27AE60; }
+
+  /* Synthèse texte */
+  .bg-synth { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px; font-size:13px; line-height:1.7; }
+  .bg-synth strong { color:var(--accent); }
+
+  @media print {
+    .bg-modal-bg { position:static; background:none; display:block; padding:0; }
+    .bg-modal { box-shadow:none; border:none; }
+    .bg-close, .bg-tabs, .bg-btn-row { display:none !important; }
+    .bg-tab-panel { display:block !important; }
+    body > *:not(.bg-modal-bg) { display:none !important; }
+  }
+
+  /* ── Notes Finales /20 ── */
+  .nf-modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:300; display:flex; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
+  .nf-modal { background:var(--bg2); border:1px solid var(--border); border-radius:10px; width:100%; max-width:900px; overflow:hidden; box-shadow:0 24px 64px rgba(0,0,0,.7); }
+  .nf-head { display:flex; justify-content:space-between; align-items:center; padding:14px 20px; background:var(--bg3); border-bottom:1px solid var(--border); }
+  .nf-head-title { font-family:var(--font-h); font-size:1rem; font-weight:800; }
+  .nf-head-title em { color:var(--accent); font-style:normal; }
+  .nf-close { background:none; border:1px solid var(--border); color:var(--muted); border-radius:4px; padding:4px 12px; cursor:pointer; font-size:13px; }
+  .nf-close:hover { border-color:var(--a-bd); color:var(--a-fg); }
+  .nf-body { padding:20px; }
+
+  /* Règle calcul */
+  .nf-rule { background:var(--bg3); border-left:3px solid var(--accent); border-radius:4px; padding:10px 14px; margin-bottom:16px; font-size:12px; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .nf-rule strong { color:var(--accent); font-family:var(--font-h); font-size:13px; }
+
+  /* Tableau notes */
+  .nf-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+  .nf-tbl th { font-family:var(--font-m); font-size:10px; color:var(--muted); padding:7px 8px; border-bottom:1px solid var(--border); text-align:center; background:var(--bg3); white-space:nowrap; }
+  .nf-tbl th.left { text-align:left; }
+  .nf-tbl td { padding:6px 7px; border-bottom:1px solid var(--border); text-align:center; vertical-align:middle; }
+  .nf-tbl tr:last-child td { border-bottom:none; }
+  .nf-tbl tr.row-rouge td { background:#280a0a; }
+  .nf-tbl tr.row-orange td { background:#231500; }
+  .nf-tbl tr.row-vert td { background:#051808; }
+
+  /* Inputs notes */
+  .ni { width:58px; background:var(--bg3); border:1px solid var(--border); border-radius:3px; color:var(--text); padding:4px 6px; font-family:var(--font-m); font-size:12px; text-align:center; outline:none; }
+  .ni:focus { border-color:var(--accent); }
+  .ni.err { border-color:#E74C3C; background:#280a0a; }
+
+  /* Note affichée */
+  .nf-val { font-family:var(--font-h); font-size:1.1rem; font-weight:800; display:block; }
+  .nf-val.col-rouge { color:#E74C3C; }
+  .nf-val.col-orange { color:#E67E22; }
+  .nf-val.col-vert { color:#27AE60; }
+  .nf-mention { font-size:10px; color:var(--muted); margin-top:1px; }
+  .nf-plaf { font-size:10px; color:var(--b-fg); }
+
+  /* Stats notes */
+  .nf-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin:16px 0 10px; }
+  .nf-stat { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:10px; text-align:center; }
+  .nf-stat-n { font-family:var(--font-h); font-size:1.5rem; font-weight:800; }
+  .nf-stat-l { font-size:10px; color:var(--muted); margin-top:2px; }
+
+  /* Barre distribution mentions */
+  .nf-dist-bar { display:flex; border-radius:5px; overflow:hidden; height:24px; margin:10px 0 4px; }
+  .nf-dist-seg { display:flex; align-items:center; justify-content:center; font-family:var(--font-m); font-size:10px; font-weight:700; color:#fff; transition:width .4s; }
+
+  @media print {
+    .nf-modal-bg { position:static; background:none; display:block; padding:0; }
+    .nf-modal { box-shadow:none; border:none; }
+    .nf-head .nf-close, .nf-btn-row { display:none !important; }
+    body > *:not(.nf-modal-bg) { display:none !important; }
+  }
+
+  /* ── Analyse Quantitative par Critère ── */
+  .aqc-card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-bottom:14px; }
+  .aqc-title { display:flex; align-items:center; gap:8px; font-family:var(--font-h); font-size:.95rem; font-weight:800; letter-spacing:-.01em; margin-bottom:18px; }
+  .aqc-title-icon { color:var(--accent); font-size:1.1rem; }
+
+  .aqc-row { margin-bottom:20px; }
+  .aqc-row:last-child { margin-bottom:0; }
+  .aqc-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+  .aqc-crit-name { font-family:var(--font-h); font-size:.82rem; font-weight:700; }
+  .aqc-counts { font-family:var(--font-m); font-size:11px; color:var(--muted); }
+
+  /* Barre segmentée N1/N2/N3 */
+  .aqc-bar { display:flex; border-radius:6px; overflow:hidden; height:32px; width:100%; }
+  .aqc-seg { display:flex; align-items:center; justify-content:center; font-family:var(--font-h); font-size:12px; font-weight:700; white-space:nowrap; transition:width .4s ease; overflow:hidden; min-width:0; }
+  .aqc-seg-n1 { background:#C0392B; color:#fff; }
+  .aqc-seg-n2 { background:#E67E22; color:#fff; }
+  .aqc-seg-n3 { background:#27AE60; color:#fff; }
+  .aqc-seg span { padding:0 8px; }
+
+  /* Légende et diagnostic */
+  .aqc-diag { margin-top:6px; font-size:11px; font-weight:600; }
+  .aqc-diag.d-urgence { color:#E74C3C; }
+  .aqc-diag.d-mixte   { color:#E67E22; }
+  .aqc-diag.d-ok      { color:#27AE60; }
+
+  /* Légende globale */
+  .aqc-legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; font-size:11px; }
+  .aqc-leg-item { display:flex; align-items:center; gap:5px; }
+  .aqc-leg-dot { width:12px; height:12px; border-radius:2px; flex-shrink:0; }
+
+  /* ── Save / Snapshots ── */
+  .save-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; margin-bottom:14px; }
+  .save-bar-title { font-family:var(--font-m); font-size:11px; color:var(--muted); flex-shrink:0; }
+  .save-input { flex:1; min-width:160px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:6px 10px; font-family:var(--font-b); font-size:12px; outline:none; }
+  .save-input:focus { border-color:var(--accent); }
+  .btn-save { background:var(--accent); color:#0F0F0D; border:none; border-radius:var(--radius); padding:7px 16px; font-family:var(--font-h); font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px; }
+  .btn-save:hover { filter:brightness(1.1); }
+  .btn-save:disabled { opacity:.4; cursor:not-allowed; }
+
+  .snapshots-panel { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:14px; }
+  .snap-title { font-family:var(--font-h); font-size:.8rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; }
+  .snap-empty { font-size:12px; color:var(--muted); font-style:italic; }
+  .snap-item { display:flex; align-items:center; gap:10px; padding:8px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; margin-bottom:6px; }
+  .snap-item:last-child { margin-bottom:0; }
+  .snap-meta { flex:1; }
+  .snap-name { font-family:var(--font-h); font-size:.8rem; font-weight:700; }
+  .snap-info { font-family:var(--font-m); font-size:10px; color:var(--muted); margin-top:2px; }
+  .snap-badges { display:flex; gap:4px; margin-top:4px; }
+  .btn-load { background:none; border:1px solid var(--accent); color:var(--accent); border-radius:4px; padding:4px 10px; font-family:var(--font-h); font-size:11px; font-weight:700; cursor:pointer; }
+  .btn-load:hover { background:var(--accent); color:#0F0F0D; }
+  .btn-snap-del { background:none; border:1px solid var(--a-bd); color:var(--a-fg); border-radius:4px; padding:4px 8px; font-size:11px; cursor:pointer; }
+  .btn-snap-del:hover { background:var(--a-bg); }
+
+  .toast { position:fixed; bottom:20px; right:20px; background:var(--c-bg); border:1px solid var(--c-bd); color:var(--c-fg); padding:10px 16px; border-radius:var(--radius); font-family:var(--font-h); font-size:13px; font-weight:700; z-index:999; opacity:0; transform:translateY(10px); transition:all .25s; pointer-events:none; }
+  .toast.show { opacity:1; transform:translateY(0); }
+  .toast.warn { background:var(--b-bg); border-color:var(--b-bd); color:var(--b-fg); }
+
+  /* ── Print ── */
+  @media print {
+    .stepper, .btn-row, .drop-zone, .app-header .app-notice, input, .btn { display: none !important; }
+    body { background: #fff; color: #000; }
+    .card, .seq-block, .tbl td, .planif-tbl td { border-color: #ccc !important; }
+    .panel:not(.visible) { display: none !important; }
+  }
+
+  @media (max-width: 600px) {
+    .row-inputs { grid-template-columns: 1fr; }
+    .row-inputs.header-row { display: none; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .summary-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ HEADER ════════════ -->
+<header class="app-header">
+  <div>
+    <div class="app-title">Outil ADP 2026 — <span>Rugby</span></div>
+    <div class="app-sub">COLL3_EQ_05 · CRMEF Inezgane · BOUARGANE · Niveau 2 · 12 séances</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <div class="autosave-indicator">
+      <div class="autosave-dot" id="autosave-dot"></div>
+      <span id="autosave-lbl">—</span>
+    </div>
+    <div class="app-notice">⚠ Aide à la décision · La décision reste à l&#39;enseignant</div>
+  </div>
+</header>
+
+<!-- ════════════ BARRE CONFIDENTIALITÉ ════════════ -->
+<div class="deploy-bar" id="deploy-bar">
+  <span class="deploy-bar-icon">🔒</span>
+  <span class="deploy-bar-text">
+    <strong>Données confidentielles &amp; locales</strong> — Tout est stocké uniquement sur cet appareil (localStorage). Aucune donnée n&#39;est envoyée à l&#39;extérieur. Fonctionne hors connexion.
+  </span>
+  <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;" onclick="document.getElementById('deploy-bar').style.display='none'">✕</button>
+</div>
+
+<!-- ════════════ BARRE SESSION ════════════ -->
+<div class="session-bar">
+  <span class="session-bar-title">📁 Session :</span>
+  <button class="btn-session demo" onclick="chargerDemo()">▶ Données de démo</button>
+  <button class="btn-session" onclick="importSession()">↑ Importer session</button>
+  <button class="btn-session" onclick="exportSession()">↓ Exporter session</button>
+  <button class="btn-session danger" onclick="confirmerReset()">⟳ Nouvelle session</button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="lireImport(this)">
+</div>
+
+<!-- ════════════ DIALOG CONFIRMATION ════════════ -->
+<div class="confirm-overlay" id="confirm-overlay" style="display:none;">
+  <div class="confirm-box">
+    <h3 id="confirm-title">Confirmer</h3>
+    <p id="confirm-msg">Êtes-vous sûr ?</p>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="confirmerAnnuler()">Annuler</button>
+      <button class="btn" style="background:#6B2020;color:#F5A0A0;border:1px solid #9B3030;" id="confirm-ok-btn" onclick="confirmerOK()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ STEPPER ════════════ -->
+<div class="stepper">
+  <button class="step-btn active" id="sb1" onclick="goStep(1)">① Diagnostic</button>
+  <button class="step-btn locked" id="sb2" onclick="goStep(2)">② Axes</button>
+  <button class="step-btn locked" id="sb3" onclick="goStep(3)">③ Paramétrage</button>
+  <button class="step-btn locked" id="sb4" onclick="goStep(4)">④ Planification</button>
+</div>
+
+<div id="msg-global"></div>
+
+<!-- ════════════ MODAL REMÉDIATION ════════════ -->
+<div class="rm-modal-bg" id="rm-modal" style="display:none;" onclick="if(event.target===this)rmFermer()">
+  <div class="rm-modal">
+
+    <div class="rm-head">
+      <div>
+        <div class="rm-head-title">🎯 <em>Détection</em> — Accompagnement &amp; Remédiation</div>
+        <div class="rm-head-sub">Rugby DNB · COLL3_EQ_05 · CRMEF Inezgane · BOUARGANE</div>
+      </div>
+      <button class="rm-close" onclick="rmFermer()">✕ Fermer</button>
+    </div>
+
+    <div class="rm-body">
+
+      <div class="rm-tabs">
+        <button class="rm-tab active" onclick="rmTab(1,this)">① Vue d&#39;ensemble</button>
+        <button class="rm-tab" onclick="rmTab(2,this)">② Remédiation urgente</button>
+        <button class="rm-tab" onclick="rmTab(3,this)">③ Accompagnement</button>
+        <button class="rm-tab" onclick="rmTab(4,this)">④ Tutorat pair</button>
+        <button class="rm-tab" onclick="rmTab(5,this)">⑤ Plan d&#39;action</button>
+      </div>
+
+      <div class="rm-tab-panel visible" id="rm-panel-1">
+        <div class="rm-counters" id="rm-counters"></div>
+        <div id="rm-vue-cards"></div>
+      </div>
+
+      <div class="rm-tab-panel" id="rm-panel-2">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+          Élèves avec lacunes sur <strong>2 ou 3 critères</strong> en degré A — intervention immédiate requise.
+        </div>
+        <div class="rm-cards" id="rm-cards-rem"></div>
+        <div id="rm-empty-rem" style="display:none;font-size:13px;color:#78C878;padding:16px;">
+          ✔ Aucun élève en situation de remédiation urgente.
+        </div>
+      </div>
+
+      <div class="rm-tab-panel" id="rm-panel-3">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+          Élèves avec <strong>1 lacune critique</strong> (degré A sur un critère) — accompagnement ciblé.
+        </div>
+        <div class="rm-cards" id="rm-cards-acc"></div>
+        <div id="rm-empty-acc" style="display:none;font-size:13px;color:#78C878;padding:16px;">
+          ✔ Aucun élève nécessitant un accompagnement ciblé.
+        </div>
+      </div>
+
+      <div class="rm-tab-panel" id="rm-panel-4">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">
+          Élèves au <strong>degré C sur au moins 2 critères</strong> — peuvent encadrer un pair en remédiation.
+        </div>
+        <div class="rm-cards" id="rm-cards-tut"></div>
+        <div id="rm-empty-tut" style="display:none;font-size:13px;color:#5AC8FA;padding:16px;">
+          Aucun élève au profil tuteur identifié pour le moment.
+        </div>
+        <div id="rm-pairs-zone" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="rm-tab-panel" id="rm-panel-5">
+        <div id="rm-plan-content"></div>
+      </div>
+
+      <div class="rm-btn-row btn-row" style="margin-top:14px;">
+        <button class="btn btn-secondary" onclick="rmExportCSV()">↓ Export CSV remédiation</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer plan</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ MODAL TAUX DE RÉUSSITE ════════════ -->
+<div class="tr-modal-bg" id="tr-modal" style="display:none;" onclick="if(event.target===this)trFermer()">
+  <div class="tr-modal">
+
+    <div class="tr-head">
+      <div>
+        <div class="tr-head-title">📈 <em>Taux de réussite</em> de la classe — Rugby DNB</div>
+        <div class="tr-head-sub">COLL3_EQ_05 · CRMEF Inezgane · BOUARGANE · Cycle 12 séances</div>
+      </div>
+      <button class="tr-close" onclick="trFermer()">✕ Fermer</button>
+    </div>
+
+    <div class="tr-body">
+
+      <!-- Seuil configurable -->
+      <div class="tr-seuil-bar">
+        <span class="tr-seuil-lbl">Seuil de réussite :</span>
+        <input type="range" id="tr-seuil-slider" min="8" max="18" step="1" value="10" oninput="trMettreAJour()">
+        <span class="tr-seuil-val" id="tr-seuil-val">10</span>
+        <span class="tr-seuil-unit">/10</span>
+        <span class="tr-seuil-note">&nbsp;— Déplacer le curseur pour simuler différents seuils</span>
+      </div>
+
+      <!-- Grande jauge -->
+      <div class="tr-jauge-main">
+        <div class="tr-pct-big" id="tr-pct-big">—</div>
+        <div class="tr-pct-sub" id="tr-pct-sub">de la classe au-dessus du seuil</div>
+        <div class="tr-jauge-ticks">
+          <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+        </div>
+        <div class="tr-jauge-bar">
+          <div class="tr-jauge-fill" id="tr-jauge-fill" style="width:0%;background:#5AC8FA"></div>
+        </div>
+        <div id="tr-verdict-wrap" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- Mini-stats -->
+      <div class="tr-stats-grid" id="tr-stats-grid"></div>
+
+      <!-- Distribution des scores -->
+      <div class="tr-distrib">
+        <div class="tr-distrib-title">Distribution des scores moyens /10 par tranche</div>
+        <div id="tr-distrib-bars"></div>
+      </div>
+
+      <!-- Analyse contextuelle -->
+      <div id="tr-analyse-zone" style="margin-bottom:16px;"></div>
+
+      <!-- Tableau élèves -->
+      <div style="overflow-x:auto;">
+        <table class="tr-elv-tbl" id="tr-elv-tbl"></table>
+      </div>
+
+      <div class="tr-btn-row btn-row" style="margin-top:14px;">
+        <button class="btn btn-secondary" onclick="trExportCSV()">↓ Export CSV réussite</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ MODAL BILAN GLOBAL ════════════ -->
+<div class="bg-modal-bg" id="bg-modal" style="display:none;" onclick="if(event.target===this)bgFermer()">
+  <div class="bg-modal">
+
+    <div class="bg-head">
+      <div class="bg-head-left">
+        <div class="bg-head-title">📊 Bilan global — <em>Atteinte des objectifs d&#39;apprentissage</em></div>
+        <div class="bg-head-sub">Rugby DNB · COLL3_EQ_05 · Cycle N1→N2 · 12 séances · BOUARGANE</div>
+      </div>
+      <button class="bg-close" onclick="bgFermer()">✕ Fermer</button>
+    </div>
+
+    <div class="bg-body">
+
+      <!-- Onglets -->
+      <div class="bg-tabs">
+        <button class="bg-tab active" onclick="bgTab(1,this)">① Vue globale</button>
+        <button class="bg-tab" onclick="bgTab(2,this)">② Par critère</button>
+        <button class="bg-tab" onclick="bgTab(3,this)">③ Par élève</button>
+        <button class="bg-tab" onclick="bgTab(4,this)">④ Recommandations</button>
+      </div>
+
+      <!-- ── ONGLET 1 : VUE GLOBALE ── -->
+      <div class="bg-tab-panel visible" id="bg-panel-1">
+        <div class="bg-jauge-wrap">
+          <div class="bg-jauge-title">Taux d&#39;atteinte global des objectifs du cycle</div>
+          <div id="bg-jauge-content"></div>
+        </div>
+        <div id="bg-global-synth"></div>
+        <div id="bg-global-distrib"></div>
+      </div>
+
+      <!-- ── ONGLET 2 : PAR CRITÈRE ── -->
+      <div class="bg-tab-panel" id="bg-panel-2">
+        <div id="bg-crit-content"></div>
+      </div>
+
+      <!-- ── ONGLET 3 : PAR ÉLÈVE ── -->
+      <div class="bg-tab-panel" id="bg-panel-3">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+          Atteinte individuelle par critère — N2 = objectif atteint · N1 = en progression · N0 = non atteint
+        </div>
+        <div style="overflow-x:auto;"><table class="bg-elv-tbl" id="bg-elv-tbl"></table></div>
+      </div>
+
+      <!-- ── ONGLET 4 : RECOMMANDATIONS ── -->
+      <div class="bg-tab-panel" id="bg-panel-4">
+        <div id="bg-reco-content"></div>
+      </div>
+
+      <div class="bg-btn-row btn-row" style="margin-top:16px;">
+        <button class="btn btn-secondary" onclick="bgExportCSV()">↓ Export bilan CSV</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer bilan</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ MODAL NOTES FINALES ════════════ -->
+<div class="nf-modal-bg" id="nf-modal" style="display:none;" onclick="if(event.target===this)nfFermer()">
+  <div class="nf-modal">
+    <div class="nf-head">
+      <div class="nf-head-title">🏆 Notes finales — <em>Rugby DNB</em> — COLL3_EQ_05</div>
+      <button class="nf-close" onclick="nfFermer()">✕ Fermer</button>
+    </div>
+    <div class="nf-body">
+      <div class="nf-rule">
+        <strong>Note /20 =</strong>
+        <span>C1a <span style="color:var(--muted)">/8 (jeu)</span></span>
+        <span style="color:var(--muted)">+</span>
+        <span>C1b <span style="color:var(--muted)">/2 (matchs)</span></span>
+        <span style="color:var(--muted)">+</span>
+        <span>C2 <span style="color:var(--muted)">/8</span></span>
+        <span style="color:var(--muted)">+</span>
+        <span>C3 <span style="color:var(--muted)">/4 bonus</span></span>
+        <span style="color:var(--muted);font-size:11px">&nbsp;· Plafond 20 · Sans calculatrice</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+        Valeurs pré-remplies depuis l&#39;analyse. Ajuster si nécessaire. Note calculée en temps réel.
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="nf-tbl">
+          <thead>
+            <tr>
+              <th class="left">Élève</th>
+              <th>C1a<br><span style="font-size:9px">/8</span></th>
+              <th>C1b<br><span style="font-size:9px">/2</span></th>
+              <th>C1<br><span style="font-size:9px">/10</span></th>
+              <th>C2<br><span style="font-size:9px">/8</span></th>
+              <th>C3<br><span style="font-size:9px">/4 bonus</span></th>
+              <th style="min-width:70px;color:var(--accent)">NOTE<br><span style="font-size:9px">/20</span></th>
+              <th>Mention</th>
+            </tr>
+          </thead>
+          <tbody id="nf-tbody"></tbody>
+        </table>
+      </div>
+      <div id="nf-stats-zone"></div>
+      <div class="nf-btn-row btn-row" style="margin-top:14px;">
+        <button class="btn btn-primary" onclick="nfRecalculer()">⟳ Recalculer</button>
+        <button class="btn btn-secondary" onclick="nfExportCSV()">↓ Export CSV</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer bulletin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ TOAST ════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════════ BARRE SAUVEGARDE ════════════ -->
+<div class="save-bar" id="save-bar">
+  <span class="save-bar-title">💾 Enregistrer l&#39;analyse :</span>
+  <input class="save-input" id="save-name" type="text" placeholder="Nom du snapshot (ex : Séance 1 · Juin 2026)" maxlength="60">
+  <button class="btn-save" id="btn-save" onclick="sauvegarder()" disabled>✦ Enregistrer</button>
+  <button class="btn btn-secondary" style="font-size:12px;padding:7px 12px;" onclick="toggleSnapshots()">📋 Historique</button>
+</div>
+<div id="snapshots-panel" style="display:none;"></div>
+
+<!-- ════════════ ÉTAPE 1 ════════════ -->
+<div class="panel visible" id="panel1">
+
+  <div class="card">
+    <div class="card-title">Référentiel — Observables & Seuils</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:12px;">
+      <div><span class="badge badge-a">A</span> &lt; 4/10 &nbsp;|&nbsp; <span class="badge badge-b">B</span> 4–6.9/10 &nbsp;|&nbsp; <span class="badge badge-c">C</span> ≥ 7/10</div>
+      <div><strong>OBS-01</strong> C1a — Jeu collectif offensif &nbsp; <span style="font-family:var(--font-m);color:var(--muted)">JC− / JC~ / JC+</span></div>
+      <div><strong>OBS-02</strong> C2 — Efficacité individuelle &nbsp; <span style="font-family:var(--font-m);color:var(--muted)">JI− / JI~ / JI+</span></div>
+      <div><strong>OBS-03</strong> C3 — Arbitre / Observateur &nbsp; <span style="font-family:var(--font-m);color:var(--muted)">AR− / AR~ / AR+</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Import CSV terrain</div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvFile').click()">
+      <input type="file" id="csvFile" accept=".csv,.txt" onchange="importCSV(this)">
+      <div>📂 Cliquer pour importer un fichier CSV terrain</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Format ADP 2026 · en-tête Nom_Eleve détecté automatiquement</div>
+    </div>
+    <div id="csv-feedback"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Saisie manuelle — Élèves</div>
+    <div class="row-inputs header-row">
+      <div>Prénom</div><div>OBS-01 /10</div><div>OBS-02 /10</div><div>OBS-03 /10</div><div></div>
+    </div>
+    <div id="eleves-list"></div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-secondary" onclick="addEleve()">+ Ajouter un élève</button>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="analyser()">▶ Analyser la classe</button>
+    <button class="btn" id="btn-nf" onclick="nfOuvrir()" disabled
+      style="background:linear-gradient(135deg,#1a3a6b,#2558b0);color:#e8f0ff;border:1px solid #2558b0;">
+      🏆 Notes finales /20
+    </button>
+    <button class="btn" id="btn-tr" onclick="trOuvrir()" disabled
+      style="background:linear-gradient(135deg,#0d1f33,#163355);color:#D0E8FF;border:1px solid #1e3a5a;">
+      📈 Taux de réussite
+    </button>
+    <button class="btn" id="btn-rm" onclick="rmOuvrir()" disabled
+      style="background:linear-gradient(135deg,#1a0a2e,#2d1250);color:#E8D0FF;border:1px solid #3a1a5e;">
+      🎯 Remédiation
+    </button>
+    <button class="btn" id="btn-bg" onclick="bgOuvrir()" disabled
+      style="background:linear-gradient(135deg,#1a3a1a,#27622a);color:#d0f0d0;border:1px solid #27622a;">
+      📊 Bilan global
+    </button>
+    <button class="btn btn-secondary" onclick="exportCSV()">↓ Export CSV</button>
+    <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer</button>
+  </div>
+
+  <div id="results1" style="margin-top:20px;"></div>
+</div>
+
+<!-- ════════════ ÉTAPE 2 ════════════ -->
+<div class="panel" id="panel2">
+  <div class="card">
+    <div class="card-title">Sélection des axes prioritaires</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Sélectionner entre 3 et 4 axes. La pertinence est calculée depuis les données réelles de la classe.</div>
+    <div id="axes-list"></div>
+    <div id="axes-msg" style="margin-top:8px;font-size:12px;color:var(--a-fg);"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(1)">← Retour</button>
+    <button class="btn btn-primary" id="btn-step3" onclick="goStep(3)" disabled>Paramétrer le cycle →</button>
+  </div>
+</div>
+
+<!-- ════════════ ÉTAPE 3 ════════════ -->
+<div class="panel" id="panel3">
+  <div class="card">
+    <div class="card-title">Paramétrage du cycle — Nombre de séances</div>
+    <div class="slider-wrap">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;">
+        <input type="range" id="slider-seances" min="6" max="10" value="8" step="1" oninput="updateSlider()">
+        <span class="slider-val" id="slider-display">8</span>
+        <span style="font-size:12px;color:var(--muted)">séances</span>
+      </div>
+      <div id="slider-info" style="font-size:12px;color:var(--muted);margin-bottom:10px;"></div>
+      <div class="slider-preview" id="slider-preview"></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(2)">← Retour</button>
+    <button class="btn btn-primary" onclick="genererPlanif()">Générer la planification →</button>
+  </div>
+</div>
+
+<!-- ════════════ ÉTAPE 4 ════════════ -->
+<div class="panel" id="panel4">
+  <div id="planif-output"></div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="goStep(3)">← Retour</button>
+    <button class="btn btn-secondary" onclick="window.print()">🖨 Imprimer la planification</button>
+    <button class="btn btn-secondary" onclick="exportCSV()">↓ Export CSV</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DONNÉES EXTRAITES DES FICHIERS (aucune invention)
+// ══════════════════════════════════════════════════════════════
+
+const APS   = "Rugby";
+const CODE  = "COLL3_EQ05";
+const VOL   = 12;
+
+// Observables extraits de grille_RUGBY_COLL3_EQ05.txt
+const OBS = [
+  { id:"OBS-01", nom:"C1a — Jeu collectif offensif", codes:{ A:"JC\u2212", B:"JC\u007E", C:"JC+" } },
+  { id:"OBS-02", nom:"C2 — Efficacit\u00e9 individuelle", codes:{ A:"JI\u2212", B:"JI\u007E", C:"JI+" } },
+  { id:"OBS-03", nom:"C3 — Arbitre / Observateur",  codes:{ A:"AR\u2212", B:"AR\u007E", C:"AR+" } }
+];
+
+// Seuils extraits des fichiers (ramen\u00e9s /10)
+const SEUIL_B = 4;   // B : 4 \u00e0 6.9
+const SEUIL_C = 7;   // C : >= 7
+
+// SA extraites du r\u00e9f\u00e9rentiel
+const SA = {
+  A: "SA-A1 \u2014 Fondamentaux collectifs (lecture du jeu + non-isolement)",
+  B: "SA-B1 \u2014 Diff\u00e9renciation p\u00e9n\u00e9tration/\u00e9vitement",
+  C: "SA-C1 \u2014 Approfondissement ligne d\u2019avantage"
+};
+
+// Axes extraits de referentiel_RUGBY_COLL3_EQ05.txt
+const AXES = [
+  {
+    id:1, priorite:"haute",
+    titre:"Lecture collective du jeu et non-isolement du porteur",
+    obs:"OBS-01", prérequis:"N1-1 + N1-6",
+    justif:"JC\u2212 dominant \u2014 8/14 capacit\u00e9s N2 bloqu\u00e9es",
+    impact:"N2-1 \u00b7 N2-3 \u00b7 N2-4 \u00b7 N2-5 \u00b7 N2-7 \u00b7 N2-8 \u00b7 N2-13 \u00b7 N2-14",
+    sa:"SA-A1",
+    conduiteA:"Le joueur avance dans l\u2019axe sans lire la position des partenaires disponibles.",
+    conduiteB:"L\u2019\u00e9l\u00e8ve alterne ponctuellement p\u00e9n\u00e9tration et \u00e9vitement selon le rapport de force.",
+    conduiteC:"L\u2019\u00e9l\u00e8ve choisit spontan\u00e9ment le couloir ou le contact selon la lecture du jeu en temps r\u00e9el."
+  },
+  {
+    id:2, priorite:"moyenne",
+    titre:"Conservation du ballon et actions fondamentales de contact",
+    obs:"OBS-02", prérequis:"N1-4 + N1-5 + N1-7",
+    justif:"JI\u2212 / JI\u007E \u2014 conservation insuffisante \u00e0 l\u2019impact",
+    impact:"N2-6 \u00b7 N2-7 \u00b7 N2-9",
+    sa:"SA-A1/SA-B1",
+    conduiteA:"L\u2019\u00e9l\u00e8ve perd le ballon au contact sans prot\u00e9ger ni transmettre.",
+    conduiteB:"L\u2019\u00e9l\u00e8ve conserve ou transmet le ballon dans au moins 2 situations sur 3.",
+    conduiteC:"L\u2019\u00e9l\u00e8ve bonifie les balles au contact et choisit le bon geste (donner, arracheur, pousser)."
+  },
+  {
+    id:3, priorite:"consolidation",
+    titre:"R\u00f4les sociaux : observer, arbitrer et rendre compte",
+    obs:"OBS-03", prérequis:"N1-12",
+    justif:"AR\u2212 dominant \u2014 N2-13 \u00b7 N2-14 bloqu\u00e9s",
+    impact:"N2-13 \u00b7 N2-14 \u00b7 renforce N2-3",
+    sa:"SA-A1/SA-C1",
+    conduiteA:"L\u2019\u00e9l\u00e8ve h\u00e9site sur les actions difficiles \u00e0 arbitrer et ses donn\u00e9es sont peu fiables.",
+    conduiteB:"L\u2019\u00e9l\u00e8ve assume le r\u00f4le d\u2019arbitre avec aide ponctuelle et recueille des donn\u00e9es globales.",
+    conduiteC:"L\u2019\u00e9l\u00e8ve assure son r\u00f4le d\u2019arbitre de mani\u00e8re autonome et produit des donn\u00e9es diff\u00e9renci\u00e9es exploitables."
+  },
+  {
+    id:4, priorite:"cible",
+    titre:"Franchissement de la ligne d\u2019avantage : choix jeu d\u00e9ploy\u00e9/group\u00e9",
+    obs:"OBS-01", prérequis:"N2-4",
+    justif:"Capacit\u00e9 cible N2 \u2014 d\u00e9bloqu\u00e9e par axe 1",
+    impact:"N2-5 \u00b7 N2-8",
+    sa:"SA-B1",
+    conduiteA:"L\u2019\u00e9l\u00e8ve ne discrimine pas la position des d\u00e9fenseurs pour choisir le type de jeu.",
+    conduiteB:"L\u2019\u00e9l\u00e8ve fait le bon choix jeu group\u00e9/d\u00e9ploy\u00e9 dans 1 \u00e0 2 situations sur 3.",
+    conduiteC:"L\u2019\u00e9l\u00e8ve fait syst\u00e9matiquement le bon choix et oriente ses courses vers l\u2019en-but en acc\u00e9l\u00e9rant."
+  },
+  {
+    id:5, priorite:"cible",
+    titre:"Soutien au PB et r\u00f4les pr\u00e9cis dans les regroupements",
+    obs:"OBS-02", prérequis:"N2-9",
+    justif:"N1-5 + N1-7 + N1-8 n\u00e9cessaires",
+    impact:"Renforce C2 degr\u00e9 C",
+    sa:"SA-B1/SA-C1",
+    conduiteA:"L\u2019\u00e9l\u00e8ve ne se positionne pas pour soutenir le porteur lors des regroupements.",
+    conduiteB:"L\u2019\u00e9l\u00e8ve assure un r\u00f4le simple (pousseur ou arracheur) avec guidage.",
+    conduiteC:"L\u2019\u00e9l\u00e8ve choisit son r\u00f4le de mani\u00e8re autonome et tient un effort optimal sur l\u2019ensemble du match."
+  },
+  {
+    id:6, priorite:"consolidation",
+    titre:"Organisation d\u00e9fensive collective : rideau et r\u00e9cup\u00e9ration",
+    obs:"OBS-01", prérequis:"N2-10 + N2-12",
+    justif:"N1-9 + N1-11 en construction \u2014 N2-12 cible",
+    impact:"Renforce C1 degr\u00e9 C en d\u00e9fense",
+    sa:"SA-B1",
+    conduiteA:"L\u2019\u00e9quipe ne reconstruit pas le rideau d\u00e9fensif apr\u00e8s les regroupements.",
+    conduiteB:"L\u2019\u00e9quipe constitue un rideau \u00e0 distance r\u00e9glementaire avec aide de l\u2019enseignant.",
+    conduiteC:"L\u2019\u00e9quipe s\u2019organise collectivement pour avancer vers le PB et r\u00e9duire son temps d\u2019initiative."
+  }
+];
+
+// Distribution s\u00e9ances (tableau 5x2 : 3axes / 4axes x 6..10 s\u00e9ances)
+const DISTRIB = {
+  3: { 6:[2,2,2], 7:[2,2,3], 8:[3,2,3], 9:[3,3,3], 10:[3,4,3] },
+  4: { 6:[1,2,2,1], 7:[2,2,2,1], 8:[2,2,2,2], 9:[2,3,2,2], 10:[3,2,3,2] }
+};
+
+// ══════════════════════════════════════════════════════════════
+// ÉTAT DE L\u2019APPLICATION
+// ══════════════════════════════════════════════════════════════
+let eleves = [];        // {prenom, obs1, obs2, obs3}
+let resultats = [];     // {prenom, obs1..3, moy, sur20, rang, profil, profilDetail, lacunes, axePrio, sa}
+let axesSelected = [];  // IDs des axes s\u00e9lectionn\u00e9s
+let nbSeances = 8;
+let stepUnlocked = 1;
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function goStep(n) {
+  if (n > stepUnlocked) return;
+  document.querySelectorAll(".panel").forEach((p,i) => p.classList.toggle("visible", i+1===n));
+  document.querySelectorAll(".step-btn").forEach((b,i) => {
+    b.classList.remove("active","done","locked");
+    if (i+1 < n)  b.classList.add("done");
+    else if (i+1===n) b.classList.add("active");
+    else if (i+1 > stepUnlocked) b.classList.add("locked");
+  });
+  if (n===2) renderAxes();
+  if (n===3) updateSlider();
+}
+
+function unlockStep(n) {
+  if (n > stepUnlocked) { stepUnlocked = n; }
+  document.querySelectorAll(".step-btn").forEach((b,i) => {
+    b.classList.remove("locked");
+    if (i+1 > stepUnlocked) b.classList.add("locked");
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// GESTION DES \u00c9L\u00c8VES (saisie manuelle)
+// ══════════════════════════════════════════════════════════════
+function addEleve(pre="", o1="", o2="", o3="") {
+  const id = Date.now() + Math.random();
+  const div = document.createElement("div");
+  div.className = "row-inputs";
+  div.dataset.id = id;
+  div.innerHTML = `
+    <input type="text" placeholder="Pr\u00e9nom" value="${pre}" class="inp-pre">
+    <input type="number" min="0" max="10" step="0.5" placeholder="0\u201310" value="${o1}" class="inp-o1">
+    <input type="number" min="0" max="10" step="0.5" placeholder="0\u201310" value="${o2}" class="inp-o2">
+    <input type="number" min="0" max="10" step="0.5" placeholder="0\u201310" value="${o3}" class="inp-o3">
+    <button class="btn-del" onclick="this.closest('.row-inputs').remove()">✕</button>`;
+  document.getElementById("eleves-list").appendChild(div);
+}
+
+function collectEleves() {
+  eleves = [];
+  let ok = true;
+  document.querySelectorAll("#eleves-list .row-inputs").forEach(row => {
+    const pre = row.querySelector(".inp-pre").value.trim();
+    const o1  = parseFloat(row.querySelector(".inp-o1").value);
+    const o2  = parseFloat(row.querySelector(".inp-o2").value);
+    const o3  = parseFloat(row.querySelector(".inp-o3").value);
+    [".inp-pre",".inp-o1",".inp-o2",".inp-o3"].forEach(s => row.querySelector(s).classList.remove("err"));
+    let rowOk = true;
+    if (!pre) { row.querySelector(".inp-pre").classList.add("err"); rowOk=false; ok=false; }
+    if (isNaN(o1)||o1<0||o1>10) { row.querySelector(".inp-o1").classList.add("err"); rowOk=false; ok=false; }
+    if (isNaN(o2)||o2<0||o2>10) { row.querySelector(".inp-o2").classList.add("err"); rowOk=false; ok=false; }
+    if (isNaN(o3)||o3<0||o3>10) { row.querySelector(".inp-o3").classList.add("err"); rowOk=false; ok=false; }
+    if (rowOk) eleves.push({prenom:pre, obs:[o1,o2,o3]});
+  });
+  return ok;
+}
+
+// ══════════════════════════════════════════════════════════════
+// IMPORT CSV
+// ══════════════════════════════════════════════════════════════
+function importCSV(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    let headerIdx = -1;
+    let cols = null;
+    // Priorit\u00e9 P2 : chercher Nom_Eleve quelle que soit la ligne
+    for (let i=0; i<lines.length; i++) {
+      if (lines[i].includes("Nom_Eleve")) { headerIdx=i; cols=lines[i].split(/[;,\t]/); break; }
+    }
+    if (headerIdx<0) { showFeedback("csv-feedback","err","En-t\u00eate Nom_Eleve non trouv\u00e9 dans le fichier."); return; }
+
+    const ci_nom = cols.findIndex(c => c.includes("Nom_Eleve"));
+    // Priorit\u00e9 P3 : chercher colonnes codes m\u00e9tier, puis deg letter, puis num\u00e9rique
+    function findCol(prefix, fallbacks) {
+      let idx = cols.findIndex(c => c.includes(prefix));
+      if (idx>=0) return {idx, type:"code"};
+      for (let fb of fallbacks) {
+        idx = cols.findIndex(c => c.includes(fb));
+        if (idx>=0) return {idx, type:fb.includes("Degre")?"letter":"num"};
+      }
+      return null;
+    }
+    const c1 = findCol("OBS01_", ["OBS01_Degre","OBS1"]);
+    const c2 = findCol("OBS02_", ["OBS02_Degre","OBS2"]);
+    const c3 = findCol("OBS03_", ["OBS03_Degre","OBS3"]);
+
+    const codeToScore = {A:3, B:6, C:9};
+    let added=0, skipped=0;
+    document.getElementById("eleves-list").innerHTML = "";
+
+    for (let i=headerIdx+1; i<lines.length; i++) {
+      const cells = lines[i].split(/[;,\t]/);
+      if (!cells[ci_nom] || cells[ci_nom].startsWith("BILAN")) { skipped++; continue; }
+      const pre = cells[ci_nom];
+      function getVal(info) {
+        if (!info) return "";
+        const raw = (cells[info.idx]||"").trim().toUpperCase();
+        if (info.type==="code" || info.type==="letter") return codeToScore[raw] || parseFloat(raw) || "";
+        return parseFloat(raw) || "";
+      }
+      addEleve(pre, getVal(c1), getVal(c2), getVal(c3));
+      added++;
+    }
+    showFeedback("csv-feedback","ok",`${added} \u00e9l\u00e8ve(s) import\u00e9(s). ${skipped} ligne(s) ignor\u00e9e(s).`);
+  };
+  reader.readAsText(input.files[0],"UTF-8");
+}
+
+// ══════════════════════════════════════════════════════════════
+// ANALYSE
+// ══════════════════════════════════════════════════════════════
+function profil(v) { return v>=SEUIL_C ? "C" : v>=SEUIL_B ? "B" : "A"; }
+function badgeClass(p) { return "badge badge-"+p.toLowerCase(); }
+
+function analyser() {
+  if (!collectEleves()) { showMsg("msg-global","err","Corriger les champs en rouge avant d\u2019analyser."); return; }
+  if (eleves.length<1) { showMsg("msg-global","err","Ajouter au moins un \u00e9l\u00e8ve."); return; }
+  showMsg("msg-global","","");
+
+  resultats = eleves.map(e => {
+    const moy = (e.obs[0]+e.obs[1]+e.obs[2])/3;
+    const pr  = profil(moy);
+    const prDetail = e.obs.map(v => profil(v));
+    // Lacunes
+    const lacunes = e.obs.map((v,i) => ({obs:OBS[i].nom, val:v, i}))
+      .filter(x => x.val<SEUIL_B)
+      .sort((a,b) => a.val-b.val)
+      .map((x,idx) => `L${idx+1} \u2014 ${x.obs} : ${x.val.toFixed(1)}/10`);
+    // Axe prioritaire bas\u00e9 sur la lacune dominante
+    const lacObs = e.obs.map((v,i) => ({v,i})).filter(x=>x.v<SEUIL_B).sort((a,b)=>a.v-b.v);
+    let axePrio = "Aucune lacune identifi\u00e9e \u2014 approfondir";
+    let saRec = pr==="C" ? SA.C : pr==="B" ? SA.B : SA.A;
+    if (lacObs.length>0) {
+      const linkedAxe = AXES.find(a => a.obs==="OBS-0"+(lacObs[0].i+1));
+      if (linkedAxe) { axePrio = linkedAxe.titre; }
+    }
+    return { prenom:e.prenom, obs:e.obs, moy, sur20:Math.min(20,moy*2), pr, prDetail, lacunes, axePrio, sa:saRec };
+  });
+
+  // Rangs
+  const sorted = [...resultats].sort((a,b) => b.moy-a.moy);
+  resultats.forEach(r => { r.rang = sorted.findIndex(s=>s===r)+1; });
+
+  renderResults();
+  unlockStep(2);
+  goStep(1);
+  document.getElementById("btn-save").disabled = false;
+  document.getElementById("btn-nf").disabled = false;
+  document.getElementById("btn-tr").disabled = false;
+  document.getElementById("btn-rm").disabled = false;
+  document.getElementById("btn-bg").disabled = false;
+  showToast("\u2713 " + resultats.length + " \u00e9l\u00e8ve(s) analys\u00e9(s)");
+}
+
+function renderResults() {
+  const el = document.getElementById("results1");
+  const cA = resultats.filter(r=>r.pr==="A").length;
+  const cB = resultats.filter(r=>r.pr==="B").length;
+  const cC = resultats.filter(r=>r.pr==="C").length;
+  const n  = resultats.length;
+  const moyClasse = resultats.reduce((s,r)=>s+r.moy,0)/n;
+
+  let decision = cA>n/2 ? "Classe d\u00e9butante \u2014 Priorit\u00e9 fondamentaux (Axe 1)" :
+                 cC>n/2 ? "Classe avanc\u00e9e \u2014 Approfondissement et tutorat" :
+                           "Classe interm\u00e9diaire \u2014 Diff\u00e9renciation A/B";
+
+  // Moyennes par obs (tableau simple)
+  const moyObs = OBS.map((_,i) => resultats.reduce((s,r)=>s+r.obs[i],0)/n);
+  const obsAnalyse = OBS.map((o,i) => {
+    const mv = moyObs[i];
+    const st = mv>=SEUIL_C ? "Bon niveau \u2014 approfondir" : mv>=SEUIL_B ? "En cours \u2014 consolider" : "Lacune collective \u2014 SA prioritaire";
+    return `<tr><td><strong>${o.id}</strong> ${o.nom}</td><td style="font-family:var(--font-m)">${mv.toFixed(1)}/10</td><td><span class="${badgeClass(profil(mv))}">${profil(mv)}</span></td><td style="color:var(--muted);font-size:11px">${st}</td></tr>`;
+  }).join("");
+
+  // ── ANALYSE QUANTITATIVE PAR CRIT\u00c8RE ──────────────────────────────
+  // N1 = degr\u00e9 A  |  N2 = degr\u00e9 B  |  N3 = degr\u00e9 C  (par observable)
+  // Correspondance : Eduscol N1 \u2194 degr\u00e9s A  |  N2 \u2194 B  |  N3 \u2194 C
+
+  const CRIT_LABELS = [
+    "C1 \u2014 Efficacit\u00e9 collective dans le gain du match",
+    "C2 \u2014 Efficacit\u00e9 individuelle dans l\u2019organisation collective",
+    "C3 \u2014 Efficacit\u00e9 dans le r\u00f4le d\u2019arbitre et d\u2019observateur"
+  ];
+
+  const aqcHTML = OBS.map((obs, oi) => {
+    const n1 = resultats.filter(r => r.prDetail[oi] === "A").length; // degr\u00e9 A = Eduscol N1
+    const n2 = resultats.filter(r => r.prDetail[oi] === "B").length; // degr\u00e9 B = N2
+    const n3 = resultats.filter(r => r.prDetail[oi] === "C").length; // degr\u00e9 C = N3
+    const total = n1 + n2 + n3;
+
+    const pct1 = total ? Math.round(n1/total*100) : 0;
+    const pct2 = total ? Math.round(n2/total*100) : 0;
+    const pct3 = total ? 100 - pct1 - pct2 : 0; // \u00e9vite erreurs d'arrondi
+
+    // Diagnostic automatique
+    let diagTxt, diagCls;
+    if (pct1 >= 50) {
+      diagTxt = "Lacunes collectives \u2014 SA \u00e0 int\u00e9grer d\u2019urgence";
+      diagCls = "d-urgence";
+    } else if (pct3 >= 50) {
+      diagTxt = "Bon niveau g\u00e9n\u00e9ral \u2014 Approfondissement N3";
+      diagCls = "d-ok";
+    } else {
+      diagTxt = "Niveau mixte \u2014 Diff\u00e9rencier N1/N2/N3";
+      diagCls = "d-mixte";
+    }
+
+    // Texte dans les segments (masqu\u00e9 si trop petit)
+    const seg1txt = pct1 >= 10 ? `<span>N1(${n1})</span>` : "";
+    const seg2txt = pct2 >= 10 ? `<span>N2(${n2})</span>` : "";
+    const seg3txt = pct3 >= 10 ? `<span>N3(${n3})</span>` : "";
+
+    return `
+      <div class="aqc-row">
+        <div class="aqc-label">
+          <span class="aqc-crit-name">${CRIT_LABELS[oi]}</span>
+          <span class="aqc-counts">${n1}N1 &nbsp;\u00b7\u00a0 ${n2}N2 &nbsp;\u00b7\u00a0 ${n3}N3</span>
+        </div>
+        <div class="aqc-bar">
+          <div class="aqc-seg aqc-seg-n1" style="width:${pct1}%">${seg1txt}</div>
+          <div class="aqc-seg aqc-seg-n2" style="width:${pct2}%">${seg2txt}</div>
+          <div class="aqc-seg aqc-seg-n3" style="width:${pct3}%">${seg3txt}</div>
+        </div>
+        <div class="aqc-diag ${diagCls}">${diagTxt}</div>
+      </div>`;
+  }).join("");
+
+  el.innerHTML = `
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num sa">${cA}</div><div class="stat-label">D\u00e9butants (A) \u2014 ${Math.round(cA/n*100)}%</div></div>
+    <div class="stat-card"><div class="stat-num sb">${cB}</div><div class="stat-label">Interm\u00e9diaires (B) \u2014 ${Math.round(cB/n*100)}%</div></div>
+    <div class="stat-card"><div class="stat-num sc">${cC}</div><div class="stat-label">Avanc\u00e9s (C) \u2014 ${Math.round(cC/n*100)}%</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${moyClasse.toFixed(1)}</div><div class="stat-label">Moyenne classe /10</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Analyse par observable</div>
+    <table class="tbl"><thead><tr><th>Observable</th><th>Moy.</th><th>Profil</th><th>Statut</th></tr></thead>
+    <tbody>${obsAnalyse}</tbody></table>
+  </div>
+
+  <div class="decision-box">${decision}<div class="decision-note">(Indicatif \u2014 d\u00e9cision finale : vous)</div></div>
+
+  <div class="aqc-card">
+    <div class="aqc-title">
+      <span class="aqc-title-icon">&#9641;</span>
+      ANALYSE QUANTITATIVE PAR CRIT\u00c8RES
+    </div>
+    <div class="aqc-legend">
+      <div class="aqc-leg-item"><div class="aqc-leg-dot" style="background:#C0392B"></div><span><strong>N1</strong> \u2014 Degr\u00e9 A &nbsp;\u00b7\u00a0 conduites d\u00e9butantes (Eduscol N1 bas)</span></div>
+      <div class="aqc-leg-item"><div class="aqc-leg-dot" style="background:#E67E22"></div><span><strong>N2</strong> \u2014 Degr\u00e9 B &nbsp;\u00b7\u00a0 conduites en construction (Eduscol N1 haut)</span></div>
+      <div class="aqc-leg-item"><div class="aqc-leg-dot" style="background:#27AE60"></div><span><strong>N3</strong> \u2014 Degr\u00e9 C &nbsp;\u00b7\u00a0 conduites cibles (Eduscol N2)</span></div>
+    </div>
+    ${aqcHTML}
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">R\u00e9sultats individuels</div>
+    <div style="overflow-x:auto;">
+    <table class="tbl">
+      <thead><tr>
+        <th>Rg</th><th>Pr\u00e9nom</th>
+        <th>OBS-01</th><th>OBS-02</th><th>OBS-03</th>
+        <th>Moy /10</th><th>Profil</th><th>D\u00e9tail</th>
+        <th>Lacune L1</th><th>Axe prioritaire</th><th>SA</th>
+      </tr></thead>
+      <tbody>${resultats.sort((a,b)=>a.rang-b.rang).map(r=>`
+        <tr class="prof-${r.pr.toLowerCase()}">
+          <td style="font-family:var(--font-m)">${r.rang}</td>
+          <td><strong>${r.prenom}</strong></td>
+          <td style="font-family:var(--font-m)">${r.obs[0].toFixed(1)}</td>
+          <td style="font-family:var(--font-m)">${r.obs[1].toFixed(1)}</td>
+          <td style="font-family:var(--font-m)">${r.obs[2].toFixed(1)}</td>
+          <td style="font-family:var(--font-m);font-weight:700">${r.moy.toFixed(1)}</td>
+          <td><span class="${badgeClass(r.pr)}">${r.pr}</span></td>
+          <td style="font-family:var(--font-m);font-size:11px">${r.prDetail.map((p,i)=>`<span class="${badgeClass(p)}">${p}</span>`).join(" ")}</td>
+          <td style="font-size:11px;color:var(--muted)">${r.lacunes[0]||"Aucune"}</td>
+          <td style="font-size:11px">${r.axePrio}</td>
+          <td style="font-size:11px;color:var(--accent)">${r.sa}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// \u00c9TAPE 2 \u2014 AXES
+// ══════════════════════════════════════════════════════════════
+function renderAxes() {
+  const n = resultats.length;
+  const el = document.getElementById("axes-list");
+  // Calcul pertinence r\u00e9elle
+  const pertinences = AXES.map(axe => {
+    const obsIdx = parseInt(axe.obs.replace("OBS-0",""))-1;
+    const pct = Math.round(resultats.filter(r=>r.obs[obsIdx]<SEUIL_B).length/n*100);
+    return pct;
+  });
+
+  el.innerHTML = AXES.map((axe,i) => `
+    <div class="axe-item ${axesSelected.includes(axe.id)?"selected":""}" onclick="toggleAxe(${axe.id},this)">
+      <input type="checkbox" ${axesSelected.includes(axe.id)?"checked":""} onclick="event.stopPropagation();toggleAxe(${axe.id},this.closest('.axe-item'))">
+      <div style="flex:1">
+        <div class="axe-title">Axe ${axe.id} \u2014 ${axe.titre}</div>
+        <div class="axe-meta">Pertinence : ${pertinences[i]}% des \u00e9l\u00e8ves concern\u00e9s &nbsp;\u00b7&nbsp; ${axe.obs} &nbsp;\u00b7&nbsp; SA : ${axe.sa} &nbsp;\u00b7&nbsp; Priorit\u00e9 : ${axe.priorite}</div>
+        <div class="pertinence-bar"><div class="pertinence-fill" style="width:${pertinences[i]}%"></div></div>
+      </div>
+    </div>`).join("");
+  checkAxeBtn();
+}
+
+function toggleAxe(id, el) {
+  const idx = axesSelected.indexOf(id);
+  if (idx>=0) {
+    axesSelected.splice(idx,1);
+    el.classList.remove("selected");
+    el.querySelector("input").checked = false;
+  } else {
+    if (axesSelected.length>=4) {
+      document.getElementById("axes-msg").textContent = "Maximum 4 axes atteint.";
+      el.querySelector("input").checked = false;
+      return;
+    }
+    axesSelected.push(id);
+    el.classList.add("selected");
+    el.querySelector("input").checked = true;
+  }
+  document.getElementById("axes-msg").textContent = axesSelected.length<3 ? `S\u00e9lectionner encore ${3-axesSelected.length} axe(s).` : "";
+  checkAxeBtn();
+}
+
+function checkAxeBtn() {
+  const ok = axesSelected.length>=3 && axesSelected.length<=4;
+  document.getElementById("btn-step3").disabled = !ok;
+}
+
+// ══════════════════════════════════════════════════════════════
+// \u00c9TAPE 3 \u2014 SLIDER
+// ══════════════════════════════════════════════════════════════
+function updateSlider() {
+  nbSeances = parseInt(document.getElementById("slider-seances").value);
+  document.getElementById("slider-display").textContent = nbSeances;
+  const nAxes = axesSelected.length;
+  const dist  = DISTRIB[nAxes] ? DISTRIB[nAxes][nbSeances] : null;
+  const axes  = axesSelected.map(id => AXES.find(a=>a.id===id));
+  document.getElementById("slider-info").textContent =
+    `${nbSeances} s\u00e9ances \u00b7 ${nAxes} axes \u00b7 ${(dist||[]).length} s\u00e9quences`;
+  if (!dist) { document.getElementById("slider-preview").innerHTML=""; return; }
+  let cumul=0;
+  document.getElementById("slider-preview").innerHTML = dist.map((nb,i) => {
+    cumul+=nb;
+    const ax = axes[i];
+    return `<div class="seq-row"><span class="seq-num">S${i+1}</span><span style="flex:1">${ax?ax.titre:"Axe "+(i+1)}</span><span style="font-family:var(--font-m);color:var(--muted)">${nb} s\u00e9ance${nb>1?"s":""} (${cumul-nb+1}\u2013${cumul})</span></div>`;
+  }).join("");
+}
+
+// ══════════════════════════════════════════════════════════════
+// \u00c9TAPE 4 \u2014 PLANIFICATION
+// ══════════════════════════════════════════════════════════════
+function genererPlanif() {
+  unlockStep(4);
+  goStep(4);
+  const nAxes  = axesSelected.length;
+  const dist   = DISTRIB[nAxes][nbSeances];
+  const axes   = axesSelected.map(id => AXES.find(a=>a.id===id));
+  const cA = resultats.filter(r=>r.pr==="A").length;
+  const cB = resultats.filter(r=>r.pr==="B").length;
+  const cC = resultats.filter(r=>r.pr==="C").length;
+  const n  = resultats.length;
+
+  let html = `<div class="card"><div class="card-title">Planification du cycle \u2014 ${nbSeances} s\u00e9ances \u2014 ${nAxes} axes</div></div>`;
+  let seanceGlobal = 0;
+
+  dist.forEach((nb, si) => {
+    const axe = axes[si];
+    const seanceDebut = seanceGlobal+1;
+    seanceGlobal += nb;
+    html += `<div class="seq-block">
+      <div class="seq-header">
+        <div>
+          <span style="font-family:var(--font-m);color:var(--muted);font-size:11px">S\u00c9QUENCE ${si+1}</span>
+          <div class="seq-header-title">${axe.titre}</div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:var(--muted)">
+          ${nb} s\u00e9ance${nb>1?"s":""} &nbsp;\u00b7&nbsp; S\u00e9ances ${seanceDebut}\u2013${seanceDebut+nb-1}<br>
+          <span style="font-family:var(--font-m);font-size:11px">${axe.obs} &nbsp;\u00b7&nbsp; ${axe.sa}</span>
+        </div>
+      </div>
+      <table class="planif-tbl">
+        <thead><tr>
+          <th>N\u00b0</th><th>Objectif</th>
+          <th class="gr-a">Groupe A \u2014 D\u00e9butants (${cA}\u00e9l.)</th>
+          <th class="gr-b">Groupe B \u2014 Interm\u00e9d. (${cB}\u00e9l.)</th>
+          <th class="gr-c">Groupe C \u2014 Avanc\u00e9s (${cC}\u00e9l.)</th>
+        </tr></thead>
+        <tbody>`;
+
+    for (let si2=0; si2<nb; si2++) {
+      const sNum = seanceDebut + si2;
+      const isLast = si2===nb-1;
+      // Progression dans la s\u00e9quence
+      const prog = si2===0 ? "D\u00e9couverte" : si2===nb-1 ? "Consolidation" : "Approfondissement";
+      html += `<tr>
+        <td style="font-family:var(--font-m);white-space:nowrap">S${sNum}<br><span style="color:var(--muted);font-size:10px">${prog}</span></td>
+        <td style="max-width:160px">${axe.titre}</td>
+        <td class="gr-a">
+          <strong>${SA.A.split(" \u2014 ")[0]}</strong>
+          <div class="consigne">${axe.conduiteA}</div>
+          <div class="critere">&#10003; Crit\u00e8re : observer au moins 1 choix adapt\u00e9 sur 3 actions</div>
+        </td>
+        <td class="gr-b">
+          <strong>${SA.B.split(" \u2014 ")[0]}</strong>
+          <div class="consigne">${axe.conduiteB}</div>
+          <div class="critere">&#10003; Crit\u00e8re : 2 actions adapt\u00e9es sur 3 en situation de match</div>
+        </td>
+        <td class="gr-c">
+          <strong>${SA.C.split(" \u2014 ")[0]}</strong>
+          <div class="consigne">${axe.conduiteC}</div>
+          <div class="critere">&#10003; Crit\u00e8re : choix spontan\u00e9 et efficace en situation autonome</div>
+        </td>
+      </tr>`;
+      if (!isLast) {
+        html += `</tbody></table>
+        <div class="indicatif-box">
+          \ud83d\udccb \u00c0 observer avant la s\u00e9ance suivante \u2014 ${axe.conduiteB}
+          <br><em style="font-size:10px">(Indicatif \u2014 d\u00e9cision de progression : vous)</em>
+        </div>
+        <table class="planif-tbl"><thead><tr>
+          <th>N\u00b0</th><th>Objectif</th>
+          <th class="gr-a">Groupe A</th><th class="gr-b">Groupe B</th><th class="gr-c">Groupe C</th>
+        </tr></thead><tbody>`;
+      }
+    }
+    html += `</tbody></table></div>`;
+  });
+
+  // R\u00e9sum\u00e9 du cycle
+  html += `<div class="card" style="margin-top:16px;">
+    <div class="card-title">R\u00e9sum\u00e9 du cycle</div>
+    ${dist.map((nb,i)=>`
+      <div class="summary-row">
+        <div style="font-family:var(--font-m);color:var(--accent)">S\u00e9q. ${i+1}</div>
+        <div>${axes[i].titre}</div>
+        <div style="font-family:var(--font-m)">${nb} s\u00e9ance${nb>1?"s":""}</div>
+        <div><span class="badge badge-a">A</span><span class="badge badge-b">B</span><span class="badge badge-c">C</span></div>
+      </div>`).join("")}
+    <div style="margin-top:12px;padding:12px;background:var(--bg3);border-radius:var(--radius);font-size:12px;">
+      Ce cycle de ${nbSeances} s\u00e9ances cible ${nAxes} axes prioritaires.<br>
+      Profil le plus concern\u00e9 : <span class="badge badge-a">A</span> ${cA} \u00e9l\u00e8ve${cA>1?"s":""} (${Math.round(cA/n*100)}%).<br>
+      <span style="color:var(--muted)">R\u00e9\u00e9valuer apr\u00e8s la s\u00e9quence 2 avec une nouvelle collecte terrain.</span>
+    </div>
+  </div>`;
+
+  document.getElementById("planif-output").innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXPORT CSV
+// ══════════════════════════════════════════════════════════════
+function exportCSV() {
+  if (!resultats.length) { showMsg("msg-global","warn","Analyser d\u2019abord avant d\u2019exporter."); return; }
+  const BOM = "\uFEFF";
+  const header = "Pr\u00e9nom;Code OBS-01;OBS-01;Code OBS-02;OBS-02;Code OBS-03;OBS-03;Moyenne;/20;Rang;Profil global;Profil d\u00e9tail;Lacune 1;SA recommand\u00e9e\n";
+  const rows = resultats.map(r => {
+    const codes = r.obs.map((v,i) => OBS[i].codes[r.prDetail[i]]);
+    return [r.prenom, codes[0], r.obs[0].toFixed(1), codes[1], r.obs[1].toFixed(1), codes[2], r.obs[2].toFixed(1),
+            r.moy.toFixed(2), r.sur20.toFixed(1), r.rang,
+            r.pr, r.prDetail.join("/"), r.lacunes[0]||"Aucune", r.sa].join(";");
+  }).join("\n");
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const blob = new Blob([BOM+header+rows], {type:"text/csv;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download=`outil_v0_${APS}_${CODE}_${date}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODULE REMÉDIATION — DÉTECTION ACCOMPAGNEMENT / REMÉDIATION
+// ══════════════════════════════════════════════════════════════
+
+// Seuils de classification
+// Remédiation urgente : 2 ou 3 critères en degré A (obs < SEUIL_B)
+// Accompagnement     : exactement 1 critère en degré A
+// Tuteur potentiel   : 2 ou 3 critères en degré C (obs >= SEUIL_C)
+// En progression     : tous critères >= SEUIL_B · aucun en A
+
+// Actions spécifiques par critère lacunaire (extraites du référentiel)
+const RM_ACTIONS = {
+  0: {
+    label: "C1 — Jeu collectif offensif",
+    rem:  "Situations en 3c3 avec obligation de passer avant de progresser · fiche obs simplifiée · consigne : \u00ab regarder avant d\u2019avancer \u00bb",
+    acc:  "Jeu r\u00e9duit 4c4 avec contrat (alterner 2 p\u00e9n\u00e9trations + 1 \u00e9vitement par possession)",
+    tut:  "L\u2019\u00e9l\u00e8ve tuteur observe et annonce \u00ab p\u00e9n\u00e9tration \u00bb ou \u00ab \u00e9vitement \u00bb avant chaque action de son pair",
+    eduscol: "N1-1 \u00b7 N1-6 — S\u2019informer avant d\u2019agir \u00b7 Ne pas s\u2019isoler des partenaires"
+  },
+  1: {
+    label: "C2 — Efficacité individuelle",
+    rem:  "Ateliers contact : percuter de profil (protection corps + ballon) · conservation en phases de blocage · 3 \u00e9l\u00e8ves en rotation",
+    acc:  "Situation 1c1 avec objectif : conserver 5 secondes ou transmettre \u00e0 un partenaire libre",
+    tut:  "L\u2019\u00e9l\u00e8ve tuteur d\u00e9montre puis observe la conservation balle en main avec feedback imm\u00e9diat",
+    eduscol: "N1-4 \u00b7 N1-5 — Enchaîner actions fondamentales \u00b7 Percuter de profil"
+  },
+  2: {
+    label: "C3 — Arbitre / Observateur",
+    rem:  "R\u00f4le d\u2019arbitre systematis\u00e9 d\u00e8s la s\u00e9ance suivante · fiche d\u2019observation simplifi\u00e9e 3 items · d\u00e9briefing 2 min apr\u00e8s chaque match",
+    acc:  "Co-arbitrage avec un pair : r\u00e9partition des r\u00f4les (1 siffle · 1 observe les fautes)",
+    tut:  "L\u2019\u00e9l\u00e8ve tuteur mod\u00e9lise le r\u00f4le d\u2019observateur avec la fiche terrain",
+    eduscol: "N1-12 — Relever r\u00e9sultats fiables \u00b7 \u00c9valuer l\u2019efficacit\u00e9 d\u2019\u00e9quipe"
+  }
+};
+
+// Classifier un élève
+function rmClassifier(r) {
+  const lacunes = r.obs.filter((v,i) => v < SEUIL_B).length; // degré A
+  const excels  = r.obs.filter((v,i) => v >= SEUIL_C).length; // degré C
+  if (lacunes >= 2)  return "rem"; // Remédiation urgente
+  if (lacunes === 1) return "acc"; // Accompagnement
+  if (excels >= 2)   return "tut"; // Tuteur potentiel
+  return "ok";                     // En progression autonome
+}
+
+// Lacunes détaillées d'un élève
+function rmLacunes(r) {
+  return r.obs.map((v,i) => ({val:v, idx:i, crit:RM_ACTIONS[i].label}))
+    .filter(x => x.val < SEUIL_B)
+    .sort((a,b) => a.val-b.val);
+}
+
+// Libellés
+const RM_TYPE = {
+  rem: { lbl:"Remédiation urgente", tc:"t-rem", sc:"s-rem", ac:"a-rem", pc:"p-rem", cc:"rem-card" },
+  acc: { lbl:"Accompagnement ciblé", tc:"t-acc", sc:"s-acc", ac:"a-acc", pc:"p-acc", cc:"acc-card" },
+  tut: { lbl:"Tuteur potentiel",     tc:"t-tut", sc:"s-tut", ac:"a-tut", pc:"p-tut", cc:"tut-card" },
+  ok:  { lbl:"En progression",       tc:"t-ok",  sc:"s-ok",  ac:"a-ok",  pc:"p-ok",  cc:"ok-card"  }
+};
+
+// Construire la carte HTML d'un élève
+function rmCarte(r, type) {
+  const T = RM_TYPE[type];
+  const lacunes = rmLacunes(r);
+  const lacStr = lacunes.length
+    ? lacunes.map(l=>`<span style="color:#F5A0A0">${l.crit.split(" — ")[0]} : ${l.val.toFixed(1)}/10</span>`).join(" · ")
+    : '<span style="color:#78C878">Aucune lacune en degré A</span>';
+
+  // Action prioritaire basée sur la première lacune
+  const prio = lacunes[0];
+  let actionTxt = "";
+  if (type==="rem" || type==="acc") {
+    actionTxt = prio ? (type==="rem" ? RM_ACTIONS[prio.idx].rem : RM_ACTIONS[prio.idx].acc) : "";
+  } else if (type==="tut") {
+    const excel = r.obs.map((v,i)=>({v,i})).filter(x=>x.v>=SEUIL_C)[0];
+    actionTxt = excel ? RM_ACTIONS[excel.i].tut : "";
+  } else {
+    actionTxt = "Maintenir la progression · proposer un r\u00f4le de tuteur si disponible.";
+  }
+
+  const eduscol = prio ? RM_ACTIONS[prio.idx].eduscol : "";
+
+  return `<div class="rm-card ${T.cc}">
+    <div class="rm-card-head">
+      <div>
+        <div class="rm-card-nom">${r.prenom}</div>
+        <span class="rm-card-type ${T.tc}">${T.lbl}</span>
+      </div>
+      <div class="rm-card-score ${T.sc}">${r.moy.toFixed(1)}/10</div>
+    </div>
+    <div class="rm-card-detail">
+      <span style="font-family:var(--font-m);font-size:10px;color:var(--muted)">Profil : </span>
+      ${r.prDetail.map((p,i)=>`<span class="badge badge-${p.toLowerCase()}">${p}</span>`).join(" ")}
+      &nbsp;·&nbsp; Rang ${r.rang}
+    </div>
+    <div class="rm-card-lacunes">${lacStr}</div>
+    <div class="rm-card-action ${T.ac}">
+      <strong>Action recommandée</strong>
+      ${actionTxt}
+      ${eduscol ? `<div style="margin-top:4px;font-size:10px;color:var(--muted)">Eduscol : ${eduscol}</div>` : ""}
+    </div>
+  </div>`;
+}
+
+// Ouvrir la modale
+function rmOuvrir() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord la classe.", "warn"); return; }
+  rmRemplir();
+  document.getElementById("rm-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+// Fermer
+function rmFermer() {
+  document.getElementById("rm-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+// Navigation onglets
+function rmTab(n, btn) {
+  document.querySelectorAll(".rm-tab").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".rm-tab-panel").forEach(p => p.classList.remove("visible"));
+  btn.classList.add("active");
+  document.getElementById("rm-panel-"+n).classList.add("visible");
+}
+
+// Remplir tout le module
+function rmRemplir() {
+  const n = resultats.length;
+  const groupes = { rem:[], acc:[], tut:[], ok:[] };
+  resultats.forEach(r => { groupes[rmClassifier(r)].push(r); });
+
+  // Trier par score croissant (urgence en premier)
+  groupes.rem.sort((a,b)=>a.moy-b.moy);
+  groupes.acc.sort((a,b)=>a.moy-b.moy);
+  groupes.tut.sort((a,b)=>b.moy-a.moy);
+  groupes.ok.sort((a,b)=>b.moy-a.moy);
+
+  // ── ONGLET 1 : VUE D\u2019ENSEMBLE ────────────────────────────
+  document.getElementById("rm-counters").innerHTML = [
+    { type:"rem", count:groupes.rem.length, lbl:"Remédiation urgente",  sub:"2–3 lacunes degré A" },
+    { type:"acc", count:groupes.acc.length, lbl:"Accompagnement ciblé", sub:"1 lacune degré A"    },
+    { type:"tut", count:groupes.tut.length, lbl:"Tuteurs potentiels",   sub:"≥ 2 critères degré C"},
+    { type:"ok",  count:groupes.ok.length,  lbl:"En progression",       sub:"Aucune lacune A"     }
+  ].map(c=>`<div class="rm-counter ${c.type}">
+    <div class="rm-counter-n">${c.count}</div>
+    <div class="rm-counter-l"><strong>${c.lbl}</strong><br>${c.sub}</div>
+  </div>`).join("");
+
+  // Vue d\u2019ensemble : toutes les cartes
+  const allSorted = [...groupes.rem, ...groupes.acc, ...groupes.tut, ...groupes.ok];
+  document.getElementById("rm-vue-cards").innerHTML =
+    `<div class="rm-cards">${allSorted.map(r=>rmCarte(r,rmClassifier(r))).join("")}</div>`;
+
+  // ── ONGLET 2 : REMÉDIATION ────────────────────────────────
+  if (groupes.rem.length) {
+    document.getElementById("rm-cards-rem").innerHTML = groupes.rem.map(r=>rmCarte(r,"rem")).join("");
+    document.getElementById("rm-empty-rem").style.display = "none";
+  } else {
+    document.getElementById("rm-cards-rem").innerHTML = "";
+    document.getElementById("rm-empty-rem").style.display = "block";
+  }
+
+  // ── ONGLET 3 : ACCOMPAGNEMENT ─────────────────────────────
+  if (groupes.acc.length) {
+    document.getElementById("rm-cards-acc").innerHTML = groupes.acc.map(r=>rmCarte(r,"acc")).join("");
+    document.getElementById("rm-empty-acc").style.display = "none";
+  } else {
+    document.getElementById("rm-cards-acc").innerHTML = "";
+    document.getElementById("rm-empty-acc").style.display = "block";
+  }
+
+  // ── ONGLET 4 : TUTORAT PAIR ──────────────────────────────
+  if (groupes.tut.length) {
+    document.getElementById("rm-cards-tut").innerHTML = groupes.tut.map(r=>rmCarte(r,"tut")).join("");
+    document.getElementById("rm-empty-tut").style.display = "none";
+    // Proposer des paires tuteur→élève en remédiation
+    const paires = [];
+    groupes.tut.forEach((tut,i) => {
+      const eleve = groupes.rem[i % Math.max(1,groupes.rem.length)];
+      if (eleve) paires.push({tut, eleve});
+    });
+    // Paires tuteur→accompagnement si plus de tuteurs
+    groupes.tut.slice(groupes.rem.length).forEach((tut,i) => {
+      const eleve = groupes.acc[i % Math.max(1,groupes.acc.length)];
+      if (eleve) paires.push({tut, eleve});
+    });
+    if (paires.length) {
+      document.getElementById("rm-pairs-zone").innerHTML = `
+        <div style="font-family:var(--font-h);font-size:.8rem;font-weight:700;
+             color:#5AC8FA;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">
+          Paires tutorat suggérées
+        </div>
+        ${paires.map(p=>`<div style="display:flex;align-items:center;gap:12px;
+            background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+            padding:10px 14px;margin-bottom:8px;font-size:12px;">
+          <span style="font-weight:700;color:#5AC8FA">${p.tut.prenom}</span>
+          <span style="color:var(--muted);font-size:18px">→</span>
+          <span style="font-weight:700;color:#F5A0A0">${p.eleve.prenom}</span>
+          <span style="color:var(--muted);margin-left:auto;font-family:var(--font-m);font-size:11px;">
+            ${p.tut.moy.toFixed(1)}/10 encadre ${p.eleve.moy.toFixed(1)}/10</span>
+        </div>`).join("")}`;
+    }
+  } else {
+    document.getElementById("rm-cards-tut").innerHTML = "";
+    document.getElementById("rm-empty-tut").style.display = "block";
+    document.getElementById("rm-pairs-zone").innerHTML = "";
+  }
+
+  // ── ONGLET 5 : PLAN D\u2019ACTION ─────────────────────────────
+  const sections = [
+    { key:"rem", titre:"Remédiation urgente", badge:"#E74C3C", groupe:groupes.rem },
+    { key:"acc", titre:"Accompagnement ciblé", badge:"#E67E22", groupe:groupes.acc },
+    { key:"tut", titre:"Mobilisation des tuteurs", badge:"#5AC8FA", groupe:groupes.tut }
+  ].filter(s => s.groupe.length > 0);
+
+  document.getElementById("rm-plan-content").innerHTML = sections.map(s => `
+    <div class="rm-plan-section">
+      <div class="rm-plan-titre">
+        ${s.titre}
+        <span class="rm-plan-badge" style="background:${s.badge}20;color:${s.badge};border:1px solid ${s.badge}40">
+          ${s.groupe.length} élève${s.groupe.length>1?"s":""}
+        </span>
+      </div>
+      ${s.groupe.map(r => {
+        const lac = rmLacunes(r);
+        const prio = lac[0];
+        const action = prio
+          ? (s.key==="rem" ? RM_ACTIONS[prio.idx].rem
+          : s.key==="acc" ? RM_ACTIONS[prio.idx].acc
+          : RM_ACTIONS[r.obs.map((v,i)=>({v,i})).filter(x=>x.v>=SEUIL_C).sort((a,b)=>b.v-a.v)[0]?.i||0].tut)
+          : "Maintenir la dynamique actuelle.";
+        const lacStr = lac.map(l=>`${l.crit.split(" — ")[0]} (${l.val.toFixed(1)}/10)`).join(" · ") || "\u2014";
+        return `<div class="rm-plan-item">
+          <div class="rm-plan-item-head">
+            <span class="rm-plan-item-nom">${r.prenom}</span>
+            <span class="rm-plan-item-score">Moy. ${r.moy.toFixed(1)}/10 · Rang ${r.rang}</span>
+          </div>
+          <div class="rm-plan-item-body">
+            <strong>Lacune${lac.length>1?"s":""} identifiée${lac.length>1?"s":""}  :</strong> ${lacStr}<br>
+            <strong>Action :</strong> ${action}
+            ${prio ? `<br><strong>Référence Eduscol :</strong> ${RM_ACTIONS[prio.idx].eduscol}` : ""}
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`).join("") +
+    `<div class="rm-plan-section" style="margin-top:8px;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);
+           padding:14px;font-size:12px;color:var(--muted);">
+        <strong style="color:var(--text)">Résumé du dispositif</strong><br>
+        ${groupes.rem.length} élève${groupes.rem.length>1?"s":""} en remédiation urgente ·
+        ${groupes.acc.length} en accompagnement ·
+        ${groupes.tut.length} tuteur${groupes.tut.length>1?"s":""} identifié${groupes.tut.length>1?"s":""} ·
+        ${groupes.ok.length} en progression autonome.<br>
+        <strong style="color:var(--accent)">Prochain point de contrôle recommandé :</strong>
+        après 2 séances de remédiation · réanalyser avec un nouveau CSV terrain.
+      </div>
+    </div>`;
+}
+
+// Export CSV remédiation
+function rmExportCSV() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord.", "warn"); return; }
+  const BOM = "\uFEFF";
+  const hdr = "Rang;Pr\u00e9nom;Moy /10;OBS-01;OBS-02;OBS-03;Type;Lacunes;Action prioritaire\n";
+  const sorted = [...resultats].sort((a,b)=>a.rang-b.rang);
+  const lines = sorted.map(r => {
+    const type = rmClassifier(r);
+    const T = RM_TYPE[type];
+    const lac = rmLacunes(r);
+    const lacStr = lac.map(l=>`${l.crit.split(" — ")[0]} (${l.val.toFixed(1)})`).join(" / ") || "Aucune";
+    const prio = lac[0];
+    const action = prio ? RM_ACTIONS[prio.idx][type==="rem"?"rem":type==="acc"?"acc":"tut"]
+      .replace(/\n/g," ").substring(0,80) : "En progression";
+    return [r.rang, r.prenom, r.moy.toFixed(1),
+      r.obs[0].toFixed(1), r.obs[1].toFixed(1), r.obs[2].toFixed(1),
+      T.lbl, lacStr, action].join(";");
+  }).join("\n");
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const blob = new Blob([BOM+hdr+lines],{type:"text/csv;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href=url; a.download=`remediation_Rugby_COLL3EQ05_${date}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("CSV remédiation export\u00e9 !");
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODULE TAUX DE R\u00c9USSITE DE LA CLASSE
+// ══════════════════════════════════════════════════════════════
+
+let trSeuil = 10; // seuil par d\u00e9faut /10
+
+// Ouvrir la modale
+function trOuvrir() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord la classe.", "warn"); return; }
+  document.getElementById("tr-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  trMettreAJour();
+}
+
+// Fermer
+function trFermer() {
+  document.getElementById("tr-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+// Couleur selon taux de r\u00e9ussite
+function trCouleur(tx) {
+  if (tx >= 70) return "#27AE60";
+  if (tx >= 50) return "#5AC8FA";
+  if (tx >= 30) return "#E67E22";
+  return "#E74C3C";
+}
+
+// Verdict texte selon taux
+function trVerdict(tx) {
+  if (tx >= 75) return { txt:"\u2714\u2714 Excellent \u2014 La grande majorit\u00e9 de la classe a atteint le seuil", cls:"v-ok" };
+  if (tx >= 60) return { txt:"\u2714 Satisfaisant \u2014 Le cycle a permis d\u2019atteindre les objectifs", cls:"v-ok" };
+  if (tx >= 40) return { txt:"\u25b6 Moyen \u2014 Une partie significative n\u2019a pas atteint le seuil", cls:"v-moy" };
+  if (tx >= 25) return { txt:"\u26a0 Insuffisant \u2014 Renforcement n\u00e9cessaire sur les axes prioritaires", cls:"v-bas" };
+  return { txt:"\u2716 Faible \u2014 Reprendre les fondamentaux du niveau 1 en priorit\u00e9", cls:"v-bas" };
+}
+
+// Mise \u00e0 jour compl\u00e8te quand le slider bouge
+function trMettreAJour() {
+  trSeuil = parseInt(document.getElementById("tr-seuil-slider").value);
+  document.getElementById("tr-seuil-val").textContent = trSeuil;
+
+  const n = resultats.length;
+  const moys = resultats.map(r => r.moy); // /10
+
+  // Calculs principaux
+  const reussis   = resultats.filter(r => r.moy >= trSeuil);
+  const nonReuss  = resultats.filter(r => r.moy <  trSeuil);
+  const limites   = resultats.filter(r => r.moy >= trSeuil - 1 && r.moy < trSeuil); // \u00e0 1pt du seuil
+  const tx        = Math.round(reussis.length / n * 100);
+  const moyClasse = (moys.reduce((s,v)=>s+v,0)/n).toFixed(2);
+  const mediane   = [...moys].sort((a,b)=>a-b)[Math.floor(n/2)].toFixed(1);
+  const noteMax   = Math.max(...moys).toFixed(1);
+  const noteMin   = Math.min(...moys).toFixed(1);
+  const ecartType = Math.sqrt(moys.reduce((s,v)=>s+(v-parseFloat(moyClasse))**2,0)/n).toFixed(2);
+
+  // Couleur dynamique
+  const couleur = trCouleur(tx);
+
+  // ── Grande jauge ─────────────────────────────────────────
+  document.getElementById("tr-pct-big").textContent = tx + "%";
+  document.getElementById("tr-pct-big").style.color = couleur;
+  document.getElementById("tr-pct-sub").textContent =
+    `${reussis.length} \u00e9l\u00e8ve${reussis.length>1?"s":""} sur ${n} au-dessus du seuil ${trSeuil}/10`;
+
+  const fillEl = document.getElementById("tr-jauge-fill");
+  fillEl.style.width = tx + "%";
+  fillEl.style.background = couleur;
+
+  const v = trVerdict(tx);
+  document.getElementById("tr-verdict-wrap").innerHTML =
+    `<span class="tr-verdict ${v.cls}">${v.txt}</span>`;
+
+  // ── Mini-stats ────────────────────────────────────────────
+  document.getElementById("tr-stats-grid").innerHTML = [
+    { n: reussis.length,  l: `R\u00e9ussis (\u2265${trSeuil}/10)`, c: "#27AE60" },
+    { n: nonReuss.length, l: `Non r\u00e9ussis (<${trSeuil}/10)`,   c: "#E74C3C" },
+    { n: limites.length,  l: `\u00c0 1pt du seuil`,                 c: "#E67E22" },
+    { n: moyClasse,       l: "Moyenne classe /10",                   c: "#5AC8FA" },
+    { n: mediane,         l: "M\u00e9diane /10",                     c: "#C8A84B" },
+    { n: ecartType,       l: "\u00c9cart-type",                      c: "#888880" }
+  ].map(s => `<div class="tr-stat">
+    <div class="tr-stat-n" style="color:${s.c}">${s.n}</div>
+    <div class="tr-stat-l">${s.l}</div>
+  </div>`).join("");
+
+  // ── Distribution par tranches ─────────────────────────────
+  const tranches = [
+    { lbl:"0 – 3", min:0,   max:3,   color:"#922B21" },
+    { lbl:"3 – 5", min:3,   max:5,   color:"#C0392B" },
+    { lbl:"5 – 6", min:5,   max:6,   color:"#E67E22" },
+    { lbl:"6 – 7", min:6,   max:7,   color:"#F39C12" },
+    { lbl:"7 – 8", min:7,   max:8,   color:"#27AE60" },
+    { lbl:"8 – 9", min:8,   max:9,   color:"#1ABC9C" },
+    { lbl:"9 – 10",min:9,   max:10.1,color:"#2ECC71" }
+  ];
+  const maxCount = Math.max(1, ...tranches.map(tr =>
+    moys.filter(v => v >= tr.min && v < tr.max).length));
+
+  const barsHTML = tranches.map(tr => {
+    const cnt = moys.filter(v => v >= tr.min && v < tr.max).length;
+    const pct = Math.round(cnt / n * 100);
+    const w   = Math.round(cnt / maxCount * 100);
+    const seuilMark = trSeuil >= tr.min && trSeuil < tr.max
+      ? `<div class="tr-seuil-line">\u25ba Seuil (${trSeuil}/10) dans cette tranche</div>` : "";
+    return `${seuilMark}
+    <div class="tr-bar-row">
+      <span class="tr-bar-lbl">${tr.lbl}</span>
+      <div class="tr-bar-outer">
+        <div class="tr-bar-inner" style="width:${w}%;background:${tr.color}">
+          ${pct>5?pct+"%":""}
+        </div>
+      </div>
+      <span class="tr-bar-count">${cnt} \u00e9l.</span>
+    </div>`;
+  }).join("");
+  document.getElementById("tr-distrib-bars").innerHTML = barsHTML;
+
+  // ── Analyse contextuelle ──────────────────────────────────
+  const critiquesC1 = resultats.filter(r => r.obs[0] < trSeuil).length;
+  const critiquesC2 = resultats.filter(r => r.obs[1] < trSeuil).length;
+  const critiquesC3 = resultats.filter(r => r.obs[2] < trSeuil).length;
+  const critMax = Math.max(critiquesC1, critiquesC2, critiquesC3);
+  const critNom = critMax===critiquesC1 ? "C1 (Efficacit\u00e9 collective)"
+                : critMax===critiquesC2 ? "C2 (Efficacit\u00e9 individuelle)"
+                : "C3 (Arbitre/Observateur)";
+
+  const progression = reussis.length > 0
+    ? `${Math.round(reussis.length/n*100)}% de la classe r\u00e9ussit`
+    : "Aucun \u00e9l\u00e8ve n\u2019atteint le seuil";
+
+  document.getElementById("tr-analyse-zone").innerHTML = `
+    <div class="tr-analyse">
+      <strong>Analyse au seuil ${trSeuil}/10</strong> &nbsp;\u00b7\u00a0 ${n} \u00e9l\u00e8ves &nbsp;\u00b7\u00a0 Cycle Rugby DNB<br><br>
+      \u2022 <strong>${progression}</strong> avec une moyenne classe de <strong>${moyClasse}/10</strong>.<br>
+      \u2022 <strong>${limites.length} \u00e9l\u00e8ve${limites.length>1?"s":""}</strong> sont \u00e0 moins de 1 point du seuil — intervention cibl\u00e9e possible.<br>
+      \u2022 Crit\u00e8re le plus d\u00e9ficitaire en dessous du seuil : <strong>${critNom}</strong> (${critMax} \u00e9l\u00e8ves concern\u00e9s).<br>
+      \u2022 \u00c9cart-type : <strong>${ecartType}</strong> — ${parseFloat(ecartType)<1.5
+        ? "classe homog\u00e8ne, progression collective envisageable"
+        : "classe h\u00e9t\u00e9rog\u00e8ne, diff\u00e9renciation recommand\u00e9e"}.
+    </div>`;
+
+  // ── Tableau \u00e9l\u00e8ves ────────────────────────────────────────────
+  const sortedR = [...resultats].sort((a,b)=>a.rang-b.rang);
+  const thead = `<thead><tr>
+    <th>Rg</th><th>Pr\u00e9nom</th>
+    <th>OBS-01</th><th>OBS-02</th><th>OBS-03</th>
+    <th>Moy /10</th><th>\u00c9cart seuil</th><th>R\u00e9ussite</th>
+  </tr></thead>`;
+
+  const tbody = sortedR.map(r => {
+    const ecart = (r.moy - trSeuil).toFixed(1);
+    const ok    = r.moy >= trSeuil;
+    const lim   = r.moy >= trSeuil - 1 && !ok;
+    const ecartColor = ok ? "#27AE60" : lim ? "#E67E22" : "#E74C3C";
+    const ecartSign  = parseFloat(ecart) > 0 ? "+" : "";
+    const pill = ok
+      ? `<span class="tr-pill-ok">\u2714 R\u00e9ussi</span>`
+      : lim
+      ? `<span class="tr-pill-lim">\u25b6 Limite</span>`
+      : `<span class="tr-pill-non">\u2716 Non r\u00e9ussi</span>`;
+    return `<tr>
+      <td style="font-family:var(--font-m)">${r.rang}</td>
+      <td style="font-weight:600">${r.prenom}</td>
+      <td style="font-family:var(--font-m)">${r.obs[0].toFixed(1)}</td>
+      <td style="font-family:var(--font-m)">${r.obs[1].toFixed(1)}</td>
+      <td style="font-family:var(--font-m)">${r.obs[2].toFixed(1)}</td>
+      <td style="font-family:var(--font-m);font-weight:700;color:${ok?"#27AE60":lim?"#E67E22":"#E74C3C"}">${r.moy.toFixed(1)}</td>
+      <td style="font-family:var(--font-m);color:${ecartColor};font-weight:700">${ecartSign}${ecart}</td>
+      <td>${pill}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("tr-elv-tbl").innerHTML = thead + "<tbody>"+tbody+"</tbody>";
+}
+
+// Export CSV taux de r\u00e9ussite
+function trExportCSV() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord.", "warn"); return; }
+  const BOM = "\uFEFF";
+  const hdr = `Seuil utilis\u00e9;${trSeuil}/10\n`+
+    "Rang;Pr\u00e9nom;OBS-01 /10;OBS-02 /10;OBS-03 /10;Moy /10;\u00c9cart seuil;R\u00e9ussite\n";
+  const sorted = [...resultats].sort((a,b)=>a.rang-b.rang);
+  const lines = sorted.map(r => {
+    const ecart = (r.moy - trSeuil).toFixed(1);
+    const ok    = r.moy >= trSeuil;
+    const lim   = r.moy >= trSeuil - 1 && !ok;
+    const statut = ok ? "R\u00e9ussi" : lim ? "Limite" : "Non r\u00e9ussi";
+    return [r.rang, r.prenom,
+      r.obs[0].toFixed(1), r.obs[1].toFixed(1), r.obs[2].toFixed(1),
+      r.moy.toFixed(1), ecart, statut].join(";");
+  }).join("\n");
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const blob = new Blob([BOM+hdr+lines],{type:"text/csv;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href=url; a.download=`taux_reussite_Rugby_seuil${trSeuil}_${date}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("CSV export\u00e9 !");
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODULE BILAN GLOBAL — ATTEINTE DES OBJECTIFS D\u2019APPRENTISSAGE
+// ══════════════════════════════════════════════════════════════
+
+// Objectifs du cycle extraits du r\u00e9f\u00e9rentiel (Eduscol N1\u2192N2)
+// Seuil d\u2019atteinte : degr\u00e9 C = objectif atteint (N3)
+//                   degr\u00e9 B = en progression (N2)
+//                   degr\u00e9 A = non atteint (N1)
+const BG_OBJECTIFS = [
+  {
+    id:"OBJ-01", critere:"C1", obs:0,
+    titre:"Efficacit\u00e9 collective dans le gain du match",
+    objectif:"L\u2019\u00e9l\u00e8ve encha\u00eene des actions offensives bas\u00e9es sur l\u2019alternative p\u00e9n\u00e9tration/\u00e9vitement face \u00e0 une d\u00e9fense qui cherche \u00e0 bloquer la progression (Eduscol N2)",
+    seuil_atteinte: 7,   // score /10 = degr\u00e9 C
+    seuil_progress: 4,   // score /10 = degr\u00e9 B
+    cible_pct: 60,       // % de la classe devant atteindre l\u2019objectif
+    eduscol:"N2 \u2014 Franchissement intentionnel de la ligne d\u2019avantage"
+  },
+  {
+    id:"OBJ-02", critere:"C2", obs:1,
+    titre:"Efficacit\u00e9 individuelle dans l\u2019organisation collective",
+    objectif:"Le joueur engage des actions vari\u00e9es (percuter, d\u00e9border, soutenir) en lisant la position des d\u00e9fenseurs. Il bonifie les balles au contact et contribue au franchissement (Eduscol N2)",
+    seuil_atteinte: 7,
+    seuil_progress: 4,
+    cible_pct: 60,
+    eduscol:"N2 \u2014 Actions vari\u00e9es · soutien PB · r\u00f4les pr\u00e9cis regroupements"
+  },
+  {
+    id:"OBJ-03", critere:"C3", obs:2,
+    titre:"Efficacit\u00e9 dans le r\u00f4le d\u2019arbitre et d\u2019observateur",
+    objectif:"L\u2019\u00e9l\u00e8ve arbitre en se r\u00e9partissant les r\u00f4les, siffle et applique la gestuelle. Il rep\u00e8re les situations favorables et rend compte de l\u2019efficacit\u00e9 des actions (Eduscol N2)",
+    seuil_atteinte: 7,
+    seuil_progress: 4,
+    cible_pct: 50,
+    eduscol:"N2 \u2014 Arbitrage autonome · donn\u00e9es diff\u00e9renci\u00e9es exploitables"
+  }
+];
+
+// Atteinte d\u2019un \u00e9l\u00e8ve pour un objectif
+function bgAtteinte(score, obj) {
+  if (score >= obj.seuil_atteinte) return "att";
+  if (score >= obj.seuil_progress) return "part";
+  return "non";
+}
+
+function bgAttLibelle(a) {
+  return a==="att" ? "Atteint (N3)" : a==="part" ? "En progression (N2)" : "Non atteint (N1)";
+}
+
+// Couleur progress bar selon taux
+function bgColorTaux(t) {
+  if (t>=60) return "#27AE60";
+  if (t>=35) return "#E67E22";
+  return "#E74C3C";
+}
+
+// Classe verdict
+function bgVerdictCls(t) {
+  if (t>=60) return "att-ok";
+  if (t>=35) return "att-part";
+  return "att-non";
+}
+
+// Ouvrir la modale
+function bgOuvrir() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord la classe.", "warn"); return; }
+  bgRemplir();
+  document.getElementById("bg-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+// Fermer
+function bgFermer() {
+  document.getElementById("bg-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+// Navigation onglets
+function bgTab(n, btn) {
+  document.querySelectorAll(".bg-tab").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".bg-tab-panel").forEach(p => p.classList.remove("visible"));
+  btn.classList.add("active");
+  document.getElementById("bg-panel-"+n).classList.add("visible");
+}
+
+// Remplir tout le bilan
+function bgRemplir() {
+  const n = resultats.length;
+
+  // Calcul des taux par objectif
+  const stats = BG_OBJECTIFS.map(obj => {
+    const att  = resultats.filter(r => bgAtteinte(r.obs[obj.obs], obj)==="att").length;
+    const part = resultats.filter(r => bgAtteinte(r.obs[obj.obs], obj)==="part").length;
+    const non  = resultats.filter(r => bgAtteinte(r.obs[obj.obs], obj)==="non").length;
+    const tAtt  = Math.round(att/n*100);
+    const tPart = Math.round(part/n*100);
+    const tNon  = 100-tAtt-tPart;
+    return { obj, att, part, non, tAtt, tPart, tNon };
+  });
+
+  // Taux global = moyenne des 3 taux d\u2019atteinte
+  const txGlobal = Math.round(stats.reduce((s,st)=>s+st.tAtt,0)/stats.length);
+  const nAttTous = resultats.filter(r =>
+    BG_OBJECTIFS.every(obj => bgAtteinte(r.obs[obj.obs], obj)==="att")
+  ).length;
+  const nProgrTous = resultats.filter(r =>
+    BG_OBJECTIFS.every(obj => bgAtteinte(r.obs[obj.obs], obj)!=="non")
+  ).length;
+
+  // ── ONGLET 1 : VUE GLOBALE ────────────────────────────────
+  const verdictTxt = txGlobal>=60
+    ? "\u2714 Objectifs du cycle largement atteints"
+    : txGlobal>=35
+    ? "\u25b6 Objectifs partiellement atteints \u2014 progression \u00e0 consolider"
+    : "\u26a0 Objectifs non atteints \u2014 renforcement n\u00e9cessaire";
+
+  const couleur = bgColorTaux(txGlobal);
+
+  document.getElementById("bg-jauge-content").innerHTML = `
+    <div class="bg-score-big">
+      <span class="bg-score-num" style="color:${couleur}">${txGlobal}%</span>
+      <span class="bg-score-lbl">des \u00e9l\u00e8ves ont atteint les objectifs N2 sur au moins 2 crit\u00e8res</span>
+    </div>
+    <div class="bg-progress">
+      <div class="bg-progress-fill" style="width:${txGlobal}%;background:${couleur}"></div>
+    </div>
+    <div style="display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:4px;">
+      <span>Cible cycle : <strong style="color:var(--accent)">60%</strong></span>
+      <span>Effectif : <strong>${n} \u00e9l\u00e8ves</strong></span>
+      <span>Tous objectifs atteints : <strong style="color:#27AE60">${nAttTous} \u00e9l\u00e8ves</strong></span>
+    </div>
+    <div class="bg-verdict ${bgVerdictCls(txGlobal)}" style="margin-top:10px;">${verdictTxt}</div>`;
+
+  // Synthèse globale
+  const moyGlob = (resultats.reduce((s,r)=>s+(r.obs[0]+r.obs[1]+r.obs[2])/3,0)/n).toFixed(1);
+  const pointFort = stats.reduce((a,b) => b.tAtt>a.tAtt?b:a);
+  const pointFaible = stats.reduce((a,b) => b.tAtt<a.tAtt?b:a);
+
+  document.getElementById("bg-global-synth").innerHTML = `
+    <div class="bg-synth" style="margin-bottom:12px;">
+      <strong>Synth\u00e8se du cycle</strong> \u2014 Classe de ${n} \u00e9l\u00e8ves · Rugby DNB · Niveau 2 · 12 s\u00e9ances<br>
+      Moyenne g\u00e9n\u00e9rale : <strong>${moyGlob}/10</strong> &nbsp;\u00b7&nbsp;
+      ${nProgrTous} \u00e9l\u00e8ves en progression sur tous les crit\u00e8res &nbsp;\u00b7&nbsp;
+      ${nAttTous} \u00e9l\u00e8ves ont atteint le niveau cible N2 sur l\u2019ensemble des objectifs.<br><br>
+      <strong>Point fort de la classe :</strong> ${pointFort.obj.titre} (${pointFort.tAtt}% d\u2019atteinte)<br>
+      <strong>Point \u00e0 renforcer :</strong> ${pointFaible.obj.titre} (${pointFaible.tAtt}% d\u2019atteinte)
+    </div>`;
+
+  // Distribution A/B/C globale avec barres
+  document.getElementById("bg-global-distrib").innerHTML = `
+    <div class="bg-obj-grid">
+      ${stats.map(st => `
+        <div class="bg-obj-card">
+          <div class="bg-obj-card-head">
+            <div class="bg-obj-crit">${st.obj.critere} \u2014 ${st.obj.titre.split(" dans ")[0]}</div>
+            <div class="bg-obj-pct ${st.tAtt>=60?"ok":st.tAtt>=35?"part":"non"}">${st.tAtt}%</div>
+          </div>
+          <div class="bg-obj-bar">
+            <div class="bg-obj-fill" style="width:${st.tAtt}%;background:${bgColorTaux(st.tAtt)}"></div>
+          </div>
+          <div class="bg-obj-detail">
+            <span style="color:#27AE60">\u2714 Atteint : ${st.att} (${st.tAtt}%)</span>
+            <span style="color:#E67E22">\u25b6 Progr. : ${st.part} (${st.tPart}%)</span>
+            <span style="color:#E74C3C">\u2716 Non att. : ${st.non} (${st.tNon}%)</span>
+          </div>
+          <div class="bg-obj-tgt">Cible : ${st.obj.cible_pct}% &nbsp;\u00b7\u00a0 ${st.obj.eduscol}</div>
+        </div>`).join("")}
+    </div>`;
+
+  // ── ONGLET 2 : PAR CRIT\u00c8RE ─────────────────────────────────
+  document.getElementById("bg-crit-content").innerHTML = stats.map(st => {
+    const att  = st.att, part = st.part, non = st.non;
+    const pctCible = st.obj.cible_pct;
+    const ecart = st.tAtt - pctCible;
+    const ecartTxt = ecart>=0
+      ? `<span style="color:#27AE60">+${ecart}% au-dessus de la cible</span>`
+      : `<span style="color:#E74C3C">${ecart}% en dessous de la cible</span>`;
+
+    return `
+      <div class="bg-jauge-wrap" style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
+          <div>
+            <span style="font-family:var(--font-m);font-size:10px;color:var(--muted)">${st.obj.id}</span>
+            <div class="bg-obj-crit" style="font-size:.88rem">${st.obj.titre}</div>
+          </div>
+          <div class="bg-obj-pct ${st.tAtt>=60?"ok":st.tAtt>=35?"part":"non"}" style="font-size:1.8rem">${st.tAtt}%</div>
+        </div>
+        <div class="bg-progress" style="height:12px;margin-bottom:6px;">
+          <div class="bg-progress-fill" style="width:${st.tAtt}%;background:${bgColorTaux(st.tAtt)}"></div>
+        </div>
+        <div style="display:flex;gap:12px;font-size:11px;flex-wrap:wrap;margin-bottom:10px;">
+          <span style="color:#27AE60">\u2714 Atteint (N3) : ${att} \u00e9l\u00e8ves \u2014 ${st.tAtt}%</span>
+          <span style="color:#E67E22">\u25b6 En progression (N2) : ${part} \u00e9l\u00e8ves \u2014 ${st.tPart}%</span>
+          <span style="color:#E74C3C">\u2716 Non atteint (N1) : ${non} \u00e9l\u00e8ves \u2014 ${st.tNon}%</span>
+          <span>Cible : ${pctCible}% &nbsp;\u00b7&nbsp; ${ecartTxt}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);font-style:italic;border-top:1px solid var(--border);padding-top:8px;">
+          <strong style="color:var(--text)">Objectif Eduscol :</strong> ${st.obj.objectif}
+        </div>
+      </div>`;
+  }).join("");
+
+  // ── ONGLET 3 : PAR \u00c9L\u00c8VE ──────────────────────────────────
+  const sortedR = [...resultats].sort((a,b)=>a.rang-b.rang);
+  const thead = `<thead><tr>
+    <th>Rg</th><th>Pr\u00e9nom</th>
+    ${BG_OBJECTIFS.map(o=>`<th>${o.critere}<br><span style="font-size:9px;color:var(--muted)">${o.id}</span></th>`).join("")}
+    <th>Score moy.</th><th>Bilan</th>
+  </tr></thead>`;
+
+  const tbody2 = sortedR.map(r => {
+    const atts = BG_OBJECTIFS.map(obj => bgAtteinte(r.obs[obj.obs], obj));
+    const nAtt  = atts.filter(a=>a==="att").length;
+    const bilan = nAtt===3 ? "att" : nAtt>=1 ? "part" : "non";
+    const bilanTxt = nAtt===3 ? "\u2714 Tous atteints" : nAtt>=1 ? `${nAtt}/3 atteint${nAtt>1?"s":""}` : "\u2716 Non atteint";
+    return `<tr>
+      <td style="font-family:var(--font-m)">${r.rang}</td>
+      <td style="font-weight:600">${r.prenom}</td>
+      ${atts.map((a,i)=>`<td>
+        <div class="bg-att-pill ${a}">${bgAttLibelle(a).split(" ")[0]}</div>
+        <div style="font-family:var(--font-m);font-size:10px;color:var(--muted);margin-top:2px">${r.obs[i].toFixed(1)}/10</div>
+      </td>`).join("")}
+      <td style="font-family:var(--font-m);font-weight:700">${r.moy.toFixed(1)}/10</td>
+      <td><span class="bg-att-pill ${bilan}">${bilanTxt}</span></td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("bg-elv-tbl").innerHTML = thead + "<tbody>"+tbody2+"</tbody>";
+
+  // ── ONGLET 4 : RECOMMANDATIONS ───────────────────────────
+  const recos = [];
+
+  // Axe le plus en d\u00e9ficit
+  const critDeficit = stats.reduce((a,b) => b.tNon>a.tNon?b:a);
+  if (critDeficit.tNon > 30) {
+    recos.push({
+      cls:"reco-urgence",
+      priority:"Priorit\u00e9 1 \u2014 Action imm\u00e9diate",
+      titre:`Renforcer ${critDeficit.obj.critere} \u2014 ${critDeficit.obj.titre}`,
+      detail:`${critDeficit.non} \u00e9l\u00e8ves (${critDeficit.tNon}%) n\u2019ont pas atteint l\u2019objectif. `+
+             `Axe recommand\u00e9 : ${critDeficit.obj.eduscol}. `+
+             `Pr\u00e9voir des SA sp\u00e9cifiques degr\u00e9 A lors des 2 prochaines s\u00e9ances.`
+    });
+  }
+
+  // \u00c9l\u00e8ves en progression qui peuvent atteindre N3
+  const enProg = resultats.filter(r =>
+    BG_OBJECTIFS.some(obj => bgAtteinte(r.obs[obj.obs], obj)==="part")
+  ).length;
+  if (enProg > 0) {
+    recos.push({
+      cls:"",
+      priority:"Priorit\u00e9 2 \u2014 Consolidation",
+      titre:`Accompagner les ${enProg} \u00e9l\u00e8ves en progression`,
+      detail:`Ces \u00e9l\u00e8ves sont au degr\u00e9 B sur au moins un crit\u00e8re. Ils peuvent atteindre N3 avec `+
+             `un travail cibl\u00e9 sur les SA-B1 (alt. p\u00e9n\u00e9tration/\u00e9vitement) et les regroupements. `+
+             `Tutorat pair entre \u00e9l\u00e8ves C et B recommand\u00e9.`
+    });
+  }
+
+  // Point fort \u00e0 valoriser
+  if (pointFort.tAtt >= 50) {
+    recos.push({
+      cls:"reco-ok",
+      priority:"Point fort \u2014 \u00c0 valoriser",
+      titre:`${pointFort.obj.critere} : ${pointFort.obj.titre.split(" dans ")[0]} (${pointFort.tAtt}%)`,
+      detail:`Ce crit\u00e8re d\u00e9passe la cible (${pointFort.obj.cible_pct}%). Les \u00e9l\u00e8ves ayant atteint N3 `+
+             `sur ce crit\u00e8re peuvent jouer un r\u00f4le de r\u00e9f\u00e9rent et d\u2019observateur lors des matchs. `+
+             `Exploiter cette dynamique pour cr\u00e9er une \u00e9mulation positive.`
+    });
+  }
+
+  // R\u00e9\u00e9valuation
+  recos.push({
+    cls:"",
+    priority:"Horizon \u2014 Prochaine \u00e9valuation",
+    titre:"R\u00e9\u00e9valuation diagnostique recommand\u00e9e",
+    detail:`Apr\u00e8s renforcement des axes d\u00e9ficitaires, r\u00e9\u00e9valuer en s\u00e9ance ${Math.min(12, 8)} `+
+           `pour mesurer la progression. Cible de r\u00e9vision : ${Math.min(100, txGlobal+15)}% d\u2019atteinte globale. `+
+           `Utiliser le CSV d\u2019export pour comparer les deux vagues.`
+  });
+
+  document.getElementById("bg-reco-content").innerHTML = `
+    <div class="bg-reco-list">
+      ${recos.map(r=>`
+        <div class="bg-reco-item ${r.cls}">
+          <div class="bg-reco-priority">${r.priority}</div>
+          <div class="bg-reco-titre">${r.titre}</div>
+          <div class="bg-reco-detail">${r.detail}</div>
+        </div>`).join("")}
+    </div>`;
+}
+
+// Export CSV bilan
+function bgExportCSV() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord la classe.", "warn"); return; }
+  const BOM = "\uFEFF";
+  const hdr = "Rang;Pr\u00e9nom;OBJ-01 score;OBJ-01 atteinte;OBJ-02 score;OBJ-02 atteinte;OBJ-03 score;OBJ-03 atteinte;Moy /10;Bilan global\n";
+  const sorted = [...resultats].sort((a,b)=>a.rang-b.rang);
+  const lines = sorted.map(r => {
+    const atts = BG_OBJECTIFS.map(obj => bgAttLibelle(bgAtteinte(r.obs[obj.obs], obj)));
+    const nAtt = BG_OBJECTIFS.filter(obj => bgAtteinte(r.obs[obj.obs], obj)==="att").length;
+    const bilan = nAtt===3 ? "Tous atteints" : nAtt>=1 ? `${nAtt}/3 atteints` : "Non atteint";
+    return [r.rang, r.prenom,
+      r.obs[0].toFixed(1), atts[0],
+      r.obs[1].toFixed(1), atts[1],
+      r.obs[2].toFixed(1), atts[2],
+      r.moy.toFixed(1), bilan].join(";");
+  }).join("\n");
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const blob = new Blob([BOM+hdr+lines],{type:"text/csv;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href=url; a.download=`bilan_objectifs_Rugby_COLL3EQ05_${date}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("Bilan CSV export\u00e9 !");
+}
+
+// ══════════════════════════════════════════════════════════════
+// MODULE NOTES FINALES /20
+// ══════════════════════════════════════════════════════════════
+
+let nfData = {}; // stockage saisies { prenom: {c1a,c1b,c2,c3} }
+
+// Calcul note depuis 4 composantes
+function nfCalc(c1a,c1b,c2,c3) {
+  return Math.min(20,(parseFloat(c1a)||0)+(parseFloat(c1b)||0)+(parseFloat(c2)||0)+(parseFloat(c3)||0));
+}
+
+// Mention selon note
+function nfMention(n) {
+  if (n>=16) return "Excellent";
+  if (n>=14) return "Tr\u00e8s bien";
+  if (n>=12) return "Bien";
+  if (n>=10) return "Assez bien";
+  if (n>=8)  return "Passable";
+  return "Insuffisant";
+}
+
+// Couleur selon note
+function nfColor(n) {
+  if (n>=12) return "col-vert";
+  if (n>=8)  return "col-orange";
+  return "col-rouge";
+}
+function nfRowClass(n) {
+  if (n>=12) return "row-vert";
+  if (n>=8)  return "row-orange";
+  return "row-rouge";
+}
+
+// Ouvrir la modale
+function nfOuvrir() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord la classe.", "warn"); return; }
+  nfRemplir();
+  document.getElementById("nf-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+// Fermer la modale
+function nfFermer() {
+  document.getElementById("nf-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+// Remplir le tableau
+function nfRemplir() {
+  const tbody = document.getElementById("nf-tbody");
+  const sorted = [...resultats].sort((a,b)=>a.rang-b.rang);
+
+  tbody.innerHTML = sorted.map((r,idx) => {
+    const sv = nfData[r.prenom] || {};
+    // Pr\u00e9-remplissage : OBS /10 \u2192 C1a /8 et C2 /8 (x0.8) · C3 /4 (x0.4)
+    const c1a = sv.c1a !== undefined ? sv.c1a : parseFloat((r.obs[0]*0.8).toFixed(1));
+    const c1b = sv.c1b !== undefined ? sv.c1b : 0;
+    const c2  = sv.c2  !== undefined ? sv.c2  : parseFloat((r.obs[1]*0.8).toFixed(1));
+    const c3  = sv.c3  !== undefined ? sv.c3  : parseFloat((r.obs[2]*0.4).toFixed(1));
+    const note = nfCalc(c1a,c1b,c2,c3);
+    const rc = nfRowClass(note);
+    const plaf = (parseFloat(c1a)||0)+(parseFloat(c1b)||0)+(parseFloat(c2)||0)+(parseFloat(c3)||0) > 20;
+
+    return `<tr class="${rc}" id="nfrow-${idx}">
+      <td style="text-align:left;font-weight:600">${r.prenom}</td>
+      <td><input class="ni" type="number" min="0" max="8"  step="0.5" value="${c1a}"
+          title="C1a : A=0\u20132,5 \u00b7 B=3\u20134,5 \u00b7 C=5\u20136"
+          oninput="nfUpdate(${idx},'c1a',this.value,'${r.prenom.replace(/'/g,"\\'")}')"></td>
+      <td><input class="ni" type="number" min="0" max="2"  step="1"   value="${c1b}"
+          title="C1b : 0 victoire=0pt \u00b7 1=1pt \u00b7 2=2pts"
+          oninput="nfUpdate(${idx},'c1b',this.value,'${r.prenom.replace(/'/g,"\\'")}')"></td>
+      <td id="nfc1t-${idx}" style="font-family:var(--font-m);font-weight:700;color:var(--accent)">
+        ${((parseFloat(c1a)||0)+(parseFloat(c1b)||0)).toFixed(1)}/10
+      </td>
+      <td><input class="ni" type="number" min="0" max="8"  step="0.5" value="${c2}"
+          title="C2 : A=0\u20133,5 \u00b7 B=4\u20136 \u00b7 C=6,5\u20138"
+          oninput="nfUpdate(${idx},'c2',this.value,'${r.prenom.replace(/'/g,"\\'")}')"></td>
+      <td><input class="ni" type="number" min="0" max="4"  step="0.5" value="${c3}"
+          title="C3 bonus : A=0\u20131,5 \u00b7 B=2\u20133 \u00b7 C=3,5\u20134"
+          oninput="nfUpdate(${idx},'c3',this.value,'${r.prenom.replace(/'/g,"\\'")}')"></td>
+      <td>
+        <span class="nf-val ${nfColor(note)}" id="nfval-${idx}">${note.toFixed(1)}</span>
+        ${plaf ? '<div class="nf-plaf">\u26a0 plafonn\u00e9</div>' : ''}
+      </td>
+      <td class="nf-mention" id="nfment-${idx}" style="font-size:11px;color:var(--muted)">${nfMention(note)}</td>
+    </tr>`;
+  }).join("");
+
+  nfStats();
+}
+
+// Mise \u00e0 jour temps r\u00e9el
+function nfUpdate(idx, champ, val, prenom) {
+  if (!nfData[prenom]) nfData[prenom] = {};
+  nfData[prenom][champ] = parseFloat(val)||0;
+
+  const row = document.getElementById("nfrow-"+idx);
+  const ins = row.querySelectorAll(".ni");
+  const c1a = parseFloat(ins[0].value)||0;
+  const c1b = parseFloat(ins[1].value)||0;
+  const c2  = parseFloat(ins[2].value)||0;
+  const c3  = parseFloat(ins[3].value)||0;
+
+  // Validation
+  ins[0].classList.toggle("err", c1a<0||c1a>8);
+  ins[1].classList.toggle("err", c1b<0||c1b>2);
+  ins[2].classList.toggle("err", c2<0||c2>8);
+  ins[3].classList.toggle("err", c3<0||c3>4);
+
+  const note  = nfCalc(c1a,c1b,c2,c3);
+  const plaf  = (c1a+c1b+c2+c3)>20;
+
+  document.getElementById("nfc1t-"+idx).textContent = (c1a+c1b).toFixed(1)+"/10";
+
+  const valEl = document.getElementById("nfval-"+idx);
+  valEl.textContent = note.toFixed(1);
+  valEl.className = "nf-val "+nfColor(note);
+
+  document.getElementById("nfment-"+idx).textContent = nfMention(note);
+  row.className = nfRowClass(note);
+
+  let wEl = row.querySelector(".nf-plaf");
+  if (plaf && !wEl) valEl.insertAdjacentHTML("afterend",'<div class="nf-plaf">\u26a0 plafonn\u00e9</div>');
+  else if (!plaf && wEl) wEl.remove();
+
+  nfStats();
+}
+
+// Recalculer tout
+function nfRecalculer() {
+  document.querySelectorAll("#nf-tbody tr").forEach((row,idx) => {
+    const ins = row.querySelectorAll(".ni");
+    if (ins.length===4) {
+      const pr = resultats.sort((a,b)=>a.rang-b.rang)[idx];
+      if (pr) nfUpdate(idx,"c1a",ins[0].value,pr.prenom);
+    }
+  });
+  showToast("\u2713 Notes recalcul\u00e9es !");
+}
+
+// Statistiques sous le tableau
+function nfStats() {
+  const rows = document.querySelectorAll("#nf-tbody tr");
+  const notes = [];
+  rows.forEach(row => {
+    const ins = row.querySelectorAll(".ni");
+    if (ins.length===4) notes.push(nfCalc(ins[0].value,ins[1].value,ins[2].value,ins[3].value));
+  });
+  if (!notes.length) return;
+
+  const moy   = (notes.reduce((s,n)=>s+n,0)/notes.length).toFixed(2);
+  const max   = Math.max(...notes).toFixed(1);
+  const min   = Math.min(...notes).toFixed(1);
+  const reuss = notes.filter(n=>n>=10).length;
+  const pReuss= Math.round(reuss/notes.length*100);
+
+  const mEx  = notes.filter(n=>n>=14).length;
+  const mBi  = notes.filter(n=>n>=10&&n<14).length;
+  const mPa  = notes.filter(n=>n>=8&&n<10).length;
+  const mIn  = notes.filter(n=>n<8).length;
+  const tot  = notes.length;
+  const pEx  = Math.round(mEx/tot*100);
+  const pBi  = Math.round(mBi/tot*100);
+  const pPa  = Math.round(mPa/tot*100);
+  const pIn  = 100-pEx-pBi-pPa;
+
+  document.getElementById("nf-stats-zone").innerHTML = `
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:12px;">
+      <div class="card-title" style="margin-bottom:10px;">Statistiques de la classe</div>
+      <div class="nf-stats">
+        <div class="nf-stat"><div class="nf-stat-n" style="color:var(--accent)">${moy}</div><div class="nf-stat-l">Moyenne /20</div></div>
+        <div class="nf-stat"><div class="nf-stat-n" style="color:#27AE60">${max}</div><div class="nf-stat-l">Note max</div></div>
+        <div class="nf-stat"><div class="nf-stat-n" style="color:#E74C3C">${min}</div><div class="nf-stat-l">Note min</div></div>
+        <div class="nf-stat"><div class="nf-stat-n" style="color:#27AE60">${reuss}</div><div class="nf-stat-l">R\u00e9ussite \u226510 &nbsp;(${pReuss}%)</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Distribution des mentions</div>
+      <div class="nf-dist-bar">
+        <div class="nf-dist-seg" style="width:${pEx}%;background:#27AE60">${pEx>=8?mEx+" Exc/TB":""}</div>
+        <div class="nf-dist-seg" style="width:${pBi}%;background:#2980B9">${pBi>=8?mBi+" Bien/AB":""}</div>
+        <div class="nf-dist-seg" style="width:${pPa}%;background:#E67E22">${pPa>=8?mPa+" Pass.":""}</div>
+        <div class="nf-dist-seg" style="width:${pIn}%;background:#E74C3C">${pIn>=8?mIn+" Insuf.":""}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px;margin-top:6px;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#27AE60;border-radius:2px"></span>Excellent/TB : ${mEx}</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#2980B9;border-radius:2px"></span>Bien/AB : ${mBi}</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#E67E22;border-radius:2px"></span>Passable : ${mPa}</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#E74C3C;border-radius:2px"></span>Insuffisant : ${mIn}</span>
+      </div>
+    </div>`;
+}
+
+// Export CSV notes
+function nfExportCSV() {
+  const BOM = "\uFEFF";
+  const hdr = "Rang;Pr\u00e9nom;C1a /8;C1b /2;C1 /10;C2 /8;C3 /4;Note /20;Mention\n";
+  const sorted = [...resultats].sort((a,b)=>a.rang-b.rang);
+  const rows = document.querySelectorAll("#nf-tbody tr");
+  const lines = [];
+  rows.forEach((row,idx) => {
+    const ins = row.querySelectorAll(".ni");
+    if (ins.length!==4) return;
+    const r   = sorted[idx];
+    const c1a = parseFloat(ins[0].value)||0;
+    const c1b = parseFloat(ins[1].value)||0;
+    const c2  = parseFloat(ins[2].value)||0;
+    const c3  = parseFloat(ins[3].value)||0;
+    const n   = nfCalc(c1a,c1b,c2,c3);
+    lines.push([(r?r.rang:idx+1),(r?r.prenom:"?"),c1a,c1b,(c1a+c1b).toFixed(1),c2,c3,n.toFixed(1),nfMention(n)].join(";"));
+  });
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const blob = new Blob([BOM+hdr+lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href=url; a.download=`notes_Rugby_COLL3EQ05_${date}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("CSV notes export\u00e9 !");
+}
+
+// ══════════════════════════════════════════════════════════════
+// SYSTÈME DE SAUVEGARDE — SNAPSHOTS
+// ══════════════════════════════════════════════════════════════
+
+// Clé de stockage dans localStorage du navigateur
+const STORE_KEY = "adp2026_rugby_coll3eq05_snapshots";
+
+// Charger tous les snapshots depuis le stockage local
+function loadSnapshots() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+// Sauvegarder la liste dans le stockage local
+function saveSnapshots(snaps) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(snaps)); return true; }
+  catch(e) { return false; }
+}
+
+// Enregistrer l'analyse courante comme snapshot
+function sauvegarder() {
+  if (!resultats.length) { showToast("Analyser d\u2019abord la classe.", "warn"); return; }
+  const nom = document.getElementById("save-name").value.trim();
+  if (!nom) { document.getElementById("save-name").focus(); showToast("Donner un nom au snapshot.", "warn"); return; }
+
+  const snap = {
+    id: Date.now(),
+    nom,
+    date: new Date().toLocaleString("fr-FR"),
+    aps: APS,
+    code: CODE,
+    nbEleves: resultats.length,
+    nbA: resultats.filter(r=>r.pr==="A").length,
+    nbB: resultats.filter(r=>r.pr==="B").length,
+    nbC: resultats.filter(r=>r.pr==="C").length,
+    moyClasse: (resultats.reduce((s,r)=>s+r.moy,0)/resultats.length).toFixed(2),
+    resultats: JSON.parse(JSON.stringify(resultats)),
+    axesSelected: [...axesSelected],
+    nbSeances,
+    stepUnlocked
+  };
+
+  const snaps = loadSnapshots();
+  snaps.unshift(snap); // plus récent en premier
+  if (saveSnapshots(snaps)) {
+    showToast("\u2713 Snapshot \u00ab " + nom + " \u00bb enregistr\u00e9 !");
+    document.getElementById("save-name").value = "";
+    if (document.getElementById("snapshots-panel").style.display !== "none") renderSnapshots();
+  } else {
+    showToast("Erreur de stockage. Essayer un nom plus court.", "warn");
+  }
+}
+
+// Charger un snapshot (restaure l'état complet)
+function chargerSnapshot(id) {
+  const snaps = loadSnapshots();
+  const snap = snaps.find(s => s.id === id);
+  if (!snap) { showToast("Snapshot introuvable.", "warn"); return; }
+
+  resultats     = snap.resultats;
+  axesSelected  = snap.axesSelected || [];
+  nbSeances     = snap.nbSeances || 8;
+  stepUnlocked  = snap.stepUnlocked || 2;
+
+  // Remettre les élèves dans le formulaire
+  document.getElementById("eleves-list").innerHTML = "";
+  resultats.forEach(r => addEleve(r.prenom, r.obs[0], r.obs[1], r.obs[2]));
+
+  // Recalculer l'affichage
+  renderResults();
+  unlockStep(Math.max(stepUnlocked, 2));
+  goStep(1);
+  document.getElementById("btn-save").disabled = false;
+  document.getElementById("btn-nf").disabled = false;
+  document.getElementById("btn-tr").disabled = false;
+  document.getElementById("btn-rm").disabled = false;
+  document.getElementById("btn-bg").disabled = false;
+  showToast("\u21ba Snapshot \u00ab " + snap.nom + " \u00bb restaur\u00e9 !");
+}
+
+// Supprimer un snapshot
+function supprimerSnapshot(id) {
+  let snaps = loadSnapshots();
+  snaps = snaps.filter(s => s.id !== id);
+  saveSnapshots(snaps);
+  renderSnapshots();
+  showToast("Snapshot supprim\u00e9.");
+}
+
+// Afficher / masquer le panneau historique
+function toggleSnapshots() {
+  const panel = document.getElementById("snapshots-panel");
+  if (panel.style.display === "none") {
+    panel.style.display = "block";
+    renderSnapshots();
+  } else {
+    panel.style.display = "none";
+  }
+}
+
+// Rendre la liste des snapshots
+function renderSnapshots() {
+  const snaps = loadSnapshots();
+  const panel = document.getElementById("snapshots-panel");
+  if (!snaps.length) {
+    panel.innerHTML = `<div class="snapshots-panel"><div class="snap-title">Historique des analyses</div><div class="snap-empty">Aucun snapshot enregistr\u00e9.</div></div>`;
+    return;
+  }
+  const items = snaps.map(s => `
+    <div class="snap-item">
+      <div class="snap-meta">
+        <div class="snap-name">${s.nom}</div>
+        <div class="snap-info">${s.date} &nbsp;\u00b7\u00a0 ${s.nbEleves} \u00e9l\u00e8ves &nbsp;\u00b7\u00a0 Moy. ${s.moyClasse}/10</div>
+        <div class="snap-badges">
+          <span class="badge badge-a">A : ${s.nbA}</span>
+          <span class="badge badge-b">B : ${s.nbB}</span>
+          <span class="badge badge-c">C : ${s.nbC}</span>
+        </div>
+      </div>
+      <button class="btn-load" onclick="chargerSnapshot(${s.id})">&#8617; Charger</button>
+      <button class="btn-snap-del" onclick="supprimerSnapshot(${s.id})">✕</button>
+    </div>`).join("");
+  panel.innerHTML = `
+    <div class="snapshots-panel">
+      <div class="snap-title">Historique — ${snaps.length} snapshot${snaps.length>1?"s":""}</div>
+      ${items}
+      <div style="margin-top:10px;">
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 12px;" onclick="exportSnapshotsJSON()">&#8595; Exporter tout (JSON)</button>
+      </div>
+    </div>`;
+}
+
+// Exporter tous les snapshots en JSON (sauvegarde externe)
+function exportSnapshotsJSON() {
+  const snaps = loadSnapshots();
+  if (!snaps.length) { showToast("Aucun snapshot \u00e0 exporter.", "warn"); return; }
+  const blob = new Blob([JSON.stringify(snaps, null, 2)], {type:"application/json;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const a    = document.createElement("a");
+  a.href = url; a.download = `snapshots_Rugby_COLL3EQ05_${date}.json`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("JSON export\u00e9 !");
+}
+
+// Toast notification
+function showToast(msg, type="ok") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (type==="warn" ? " warn" : "");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.classList.remove("show"); }, 2800);
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILITAIRES
+// ══════════════════════════════════════════════════════════════
+function showMsg(id, type, txt) {
+  const el = document.getElementById(id);
+  if (!txt) { el.innerHTML=""; return; }
+  el.innerHTML = `<div class="alert alert-${type}">${txt}</div>`;
+}
+function showFeedback(id, type, txt) { showMsg(id, type, txt); }
+
+// ══════════════════════════════════════════════════════════════
+// DÉPLOIEMENT — CONDITIONS 2/3/5/6/8
+// ══════════════════════════════════════════════════════════════
+
+const AUTOSAVE_KEY = "adp2026_rugby_autosave"; // clé auto-save condition 3
+let autosaveTimer = null;
+
+// ── Condition 3 : Persistance automatique ────────────────────
+// Sauvegarde automatique 2 secondes après chaque modification
+function triggerAutosave() {
+  const dot = document.getElementById("autosave-dot");
+  const lbl = document.getElementById("autosave-lbl");
+  if (dot) dot.className = "autosave-dot saving";
+  if (lbl) lbl.textContent = "Sauvegarde\u2026";
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => {
+    try {
+      const state = {
+        ts: Date.now(),
+        eleves: eleves,
+        resultats: resultats,
+        axesSelected: axesSelected,
+        nbSeances: nbSeances,
+        stepUnlocked: stepUnlocked,
+        nfData: nfData
+      };
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(state));
+      if (dot) dot.className = "autosave-dot saved";
+      if (lbl) lbl.textContent = "Sauvegard\u00e9 " + new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+    } catch(e) {
+      if (lbl) lbl.textContent = "Erreur sauvegarde";
+    }
+  }, 1500);
+}
+
+// Restaurer l'auto-save au chargement
+function restaurerAutosave() {
+  try {
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (!raw) return false;
+    const state = JSON.parse(raw);
+    if (!state.eleves || !state.eleves.length) return false;
+    eleves       = state.eleves || [];
+    resultats    = state.resultats || [];
+    axesSelected = state.axesSelected || [];
+    nbSeances    = state.nbSeances || 8;
+    stepUnlocked = state.stepUnlocked || 1;
+    nfData       = state.nfData || {};
+    // Recharger le formulaire
+    document.getElementById("eleves-list").innerHTML = "";
+    eleves.forEach(e => addEleve(e.prenom, e.obs[0], e.obs[1], e.obs[2]));
+    if (resultats.length) {
+      renderResults();
+      unlockStep(Math.max(stepUnlocked, 2));
+      ["btn-save","btn-nf","btn-tr","btn-rm","btn-bg"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }
+    const lbl = document.getElementById("autosave-lbl");
+    const dot = document.getElementById("autosave-dot");
+    if (dot) dot.className = "autosave-dot saved";
+    if (lbl) lbl.textContent = "Session restaur\u00e9e · " + new Date(state.ts).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+    showToast("\u21ba Session restaur\u00e9e automatiquement !");
+    return true;
+  } catch(e) { return false; }
+}
+
+// Patcher analyser() pour déclencher l'auto-save
+const _analyserOrig = analyser;
+function analyser() {
+  _analyserOrig();
+  triggerAutosave();
+}
+
+// ── Condition 5 : Nouvelle session avec confirmation ─────────
+let _confirmCallback = null;
+
+function confirmerReset() {
+  _confirmCallback = executerReset;
+  document.getElementById("confirm-title").textContent = "\u26a0 Nouvelle session";
+  document.getElementById("confirm-msg").textContent =
+    "Cette action efface TOUTES les donn\u00e9es de la session en cours (saisies, analyses, notes).\n\nCette action est irr\u00e9versible. Voulez-vous continuer ?";
+  document.getElementById("confirm-overlay").style.display = "flex";
+}
+
+function confirmerOK() {
+  document.getElementById("confirm-overlay").style.display = "none";
+  if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
+}
+
+function confirmerAnnuler() {
+  document.getElementById("confirm-overlay").style.display = "none";
+  _confirmCallback = null;
+}
+
+function executerReset() {
+  // Vider tout
+  eleves = []; resultats = []; axesSelected = []; nbSeances = 8;
+  stepUnlocked = 1; nfData = {};
+  document.getElementById("eleves-list").innerHTML = "";
+  document.getElementById("results1").innerHTML = "";
+  ["btn-save","btn-nf","btn-tr","btn-rm","btn-bg"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = true;
+  });
+  try { localStorage.removeItem(AUTOSAVE_KEY); } catch(e) {}
+  goStep(1);
+  // Recharger avec 5 lignes vides
+  for (let i=0; i<5; i++) addEleve();
+  const dot = document.getElementById("autosave-dot");
+  const lbl = document.getElementById("autosave-lbl");
+  if (dot) dot.className = "autosave-dot";
+  if (lbl) lbl.textContent = "\u2014";
+  showToast("\u2713 Nouvelle session cr\u00e9\u00e9e !");
+}
+
+// ── Condition 6 : Export session complète ────────────────────
+function exportSession() {
+  const state = {
+    version: "ADP2026-v7",
+    aps: APS, code: CODE,
+    exportDate: new Date().toISOString(),
+    eleves, resultats, axesSelected, nbSeances, stepUnlocked, nfData,
+    snapshots: loadSnapshots()
+  };
+  const blob = new Blob([JSON.stringify(state, null, 2)],{type:"application/json;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const a    = document.createElement("a");
+  a.href=url; a.download=`session_Rugby_COLL3EQ05_${date}.json`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("\u2193 Session export\u00e9e !");
+}
+
+// ── Condition 6 : Import session ─────────────────────────────
+function importSession() {
+  document.getElementById("import-file").click();
+}
+
+function lireImport(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const state = JSON.parse(e.target.result);
+      if (!state.version || !state.version.startsWith("ADP2026")) {
+        showToast("Fichier invalide — format non reconnu.", "warn"); return;
+      }
+      _confirmCallback = () => appliquerImport(state);
+      document.getElementById("confirm-title").textContent = "\u21e7 Importer une session";
+      document.getElementById("confirm-msg").textContent =
+        `Importer la session "${state.code}" du ${new Date(state.exportDate).toLocaleDateString("fr-FR")} ?\n\nCela remplacera la session en cours.`;
+      document.getElementById("confirm-overlay").style.display = "flex";
+    } catch(e) { showToast("Erreur de lecture du fichier JSON.", "warn"); }
+  };
+  reader.readAsText(input.files[0],"UTF-8");
+  input.value = "";
+}
+
+function appliquerImport(state) {
+  eleves       = state.eleves || [];
+  resultats    = state.resultats || [];
+  axesSelected = state.axesSelected || [];
+  nbSeances    = state.nbSeances || 8;
+  stepUnlocked = state.stepUnlocked || 1;
+  nfData       = state.nfData || {};
+  if (state.snapshots) saveSnapshots(state.snapshots);
+  document.getElementById("eleves-list").innerHTML = "";
+  eleves.forEach(e => addEleve(e.prenom, e.obs[0], e.obs[1], e.obs[2]));
+  if (resultats.length) {
+    renderResults();
+    unlockStep(Math.max(stepUnlocked, 2));
+    ["btn-save","btn-nf","btn-tr","btn-rm","btn-bg"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = false;
+    });
+  }
+  triggerAutosave();
+  showToast("\u21e7 Session import\u00e9e avec succ\u00e8s !");
+}
+
+// ── Condition 8 : Données de démonstration ───────────────────
+const DEMO_DATA = [
+  { prenom:"\u0647\u0648 \u0645\u064a \u0625\u0644\u064a\u0627\u0633",   obs:[9.0, 9.0, 6.0] },
+  { prenom:"\u0627\u0643\u0631\u0627\u0645 \u0627\u0646\u062a\u062d\u0627\u0628", obs:[5.0, 4.0, 4.0] },
+  { prenom:"\u0627\u0644\u0645\u062e\u062a\u0634\u0648\u064a \u0627\u0644\u062d\u0633\u064a\u0628", obs:[3.5, 4.5, 3.0] },
+  { prenom:"\u0643\u0630\u0627\u0631\u0627 \u0645\u0633\u062a\u0629",    obs:[4.0, 5.5, 1.5] },
+  { prenom:"\u0627\u0648\u0630\u0646 \u0645\u062d\u0645\u062f",          obs:[2.0, 5.0, 3.5] },
+  { prenom:"\u0648\u062f\u0627\u0628 \u0627\u0628\u062a\u064a\u0646",    obs:[5.5, 5.0, 4.0] },
+  { prenom:"\u0631\u064a\u0644\u0633 \u0627\u062f\u0631\u064a\u0633",    obs:[3.0, 3.0, 2.5] },
+  { prenom:"\u0627\u0643\u0631\u0641 \u0647\u0645\u0632\u0629",          obs:[1.5, 7.0, 3.0] },
+  { prenom:"\u0628\u0646\u062e \u0630\u0648 \u0630\u064a\u0629",         obs:[3.0, 6.5, 1.5] },
+  { prenom:"\u0639\u0630\u0645\u0646 \u0634\u0628\u064a\u062a",          obs:[5.0, 3.0, 3.0] },
+  { prenom:"\u0627\u0644\u0628\u062c\u0627\u0631 \u0633\u0639\u064a\u062f", obs:[6.0, 5.0, 3.5] },
+  { prenom:"\u0627\u0648\u0631\u062f\u0641\u064a \u0633\u0639\u064a\u0629", obs:[2.0, 7.0, 3.5] },
+  { prenom:"\u0634\u0645\u0633 \u0643\u0630\u0646\u0627\u0646",          obs:[4.0, 8.0, 2.5] },
+  { prenom:"\u0645\u0631\u0631\u0648\u0641 \u0645\u0633\u062a",          obs:[5.0, 6.5, 1.0] },
+  { prenom:"\u0648\u062f\u0645\u0633\u062a \u0643\u0631\u064a\u0645",    obs:[5.0, 5.5, 3.5] },
+  { prenom:"\u0643\u0648\u0627\u0646 \u0645\u062d\u0645\u062f",          obs:[4.0, 3.5, 4.0] },
+  { prenom:"\u0644\u062a\u064a\u0631\u0643\u0629 \u0645\u0637\u0627\u0631\u0643", obs:[4.0, 6.5, 2.5] },
+  { prenom:"\u0628\u0648 \u062a\u0631\u064a \u0645\u062d\u0645\u062f",   obs:[2.5, 3.0, 2.0] },
+  { prenom:"\u0628\u0648\u0641\u0627 \u062c\u064a\u0645 \u0645\u062d\u0645\u062f", obs:[2.5, 4.0, 3.5] },
+  { prenom:"\u0645\u062b\u0645\u064a\u0631 \u0645\u062d\u0645\u062f",    obs:[5.5, 3.5, 2.5] }
+];
+
+function chargerDemo() {
+  _confirmCallback = () => {
+    eleves = DEMO_DATA.map(d => ({prenom:d.prenom, obs:d.obs}));
+    document.getElementById("eleves-list").innerHTML = "";
+    DEMO_DATA.forEach(d => addEleve(d.prenom, d.obs[0], d.obs[1], d.obs[2]));
+    showToast("\u25b6 Donn\u00e9es de d\u00e9mo charg\u00e9es (20 \u00e9l\u00e8ves) \u2014 Cliquer \u25b6 Analyser");
+  };
+  document.getElementById("confirm-title").textContent = "\u25b6 Charger les donn\u00e9es de d\u00e9mo";
+  document.getElementById("confirm-msg").textContent =
+    "Cela remplace la saisie actuelle par 20 élèves fictifs (données terrain Rugby DNB).\n\nContinuer ?";
+  document.getElementById("confirm-overlay").style.display = "flex";
+}
+
+// ── Init au chargement ────────────────────────────────────────
+function init() {
+  // Tenter de restaurer la session auto-save
+  const restored = restaurerAutosave();
+  // Si rien à restaurer : 5 lignes vides
+  if (!restored) {
+    for (let i=0; i<5; i++) addEleve();
+    const lbl = document.getElementById("autosave-lbl");
+    if (lbl) lbl.textContent = "Nouvelle session";
+  }
+}
+init();
+</script>
+
+<script>
+/* ── Service Worker — cache hors connexion (condition 1) ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
